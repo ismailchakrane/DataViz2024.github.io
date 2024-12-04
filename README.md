@@ -92,7 +92,7 @@ Elle offre des atouts intéressants notamment l’utilisation de couleurs rouge 
 Cependant, certains aspects peuvent être améliorés. Le texte rouge sur fond noir nuit à la lisibilité, en particulier pour les personnes ayant des déficiences visuelles. La densité d’informations pourrait être allégée pour éviter de submerger l’utilisateur, et le graphique temporel manque de détails pour analyser précisément les tendances. En ajoutant plus de granularité, de filtres interactifs et une palette de couleurs plus accessible, cette visualisation serait encore plus pertinente pour répondre aux besoins des utilisateurs des plateformes de streaming.
 
 ## Organisation
-L'organisation adoptée repose sur une communication via un groupe Discord pour assurer une coordination efficace et accessible à tous. Les réunions sont planifiées de manière structurée : une session hebdomadaire de compte rendu d'une heure le dimanche pour des discussions approfondies, et une réunion rapide d’avancement de 15 minutes le jeudi pour maintenir le rythme. 
+L'organisation adoptée repose sur une communication via un groupe Discord pour assurer une coordination efficace et accessible à tous. Les réunions sont planifiées de manière structurée : une session hebdomadaire de compte rendu d'une heure le dimanche pour des discussions approfondies, et une réunion rapide d’avancement de 15 minutes le jeudi pour maintenir le rythme. Ces réunions seront effectuées à 20h30.
 
 La répartition des rôles est la suivante :
 - Aida et Ismail se concentreront sur le design et le développement avec D3 
