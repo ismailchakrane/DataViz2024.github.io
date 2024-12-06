@@ -2,7 +2,7 @@
 
 **Membres du groupe**
 - Rida ASRI
-- Ismail Chakrane
+- Ismail CHAKRANE
 - Aida HAOUAS
 - Mohamed Massamba SENE
 
