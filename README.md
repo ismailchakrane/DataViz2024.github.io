@@ -99,6 +99,14 @@ La répartition des rôles est la suivante :
 - Rida se chargera du prétraitement des données essentiel pour garantir des données fiables
 - Massamba sera en soutient sur les différentes parties et assurera la supervision du suivi
 
+## Pistes de conception
+
+## Choix techniques
+
+- D3.js
+- tailwindcss
+- Html
+
 ## Cahier d'avancement
 
 Un cachier d'avancement permettant le suivi du projet est disponible en suivant sur le lien suivant [voir le cahier](https://docs.google.com/document/d/1OSPjtboN29_386HHnLslqIUPYdWn3UbKAYVxVNWTt7s/edit?tab=t.0#heading=h.b7mly7b1dew9)
