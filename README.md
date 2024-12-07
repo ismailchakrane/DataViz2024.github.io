@@ -104,7 +104,7 @@ La répartition des rôles est la suivante :
 ## Choix techniques
 
 - D3.js
-- tailwindcss
+- Tailwind CSS
 - Html
 
 ## Cahier d'avancement
