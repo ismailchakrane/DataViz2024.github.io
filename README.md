@@ -101,6 +101,7 @@ La répartition des rôles est la suivante :
 
 ## Pistes de conception
 
+
 ## Choix techniques
 
 - D3.js
