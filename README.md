@@ -10,6 +10,8 @@
 Les utilisateurs des plateformes de streaming, tels que Netflix, souhaitent explorer le contenu disponible de manière personnalisée et analytique. Cependant, il est difficile pour eux de comprendre les caractéristiques du catalogue, comme la diversité des genres, la répartition géographique, les tendances au fil du temps, ou encore les comparatifs avec d'autres plateformes. Ce manque de visibilité limite leur capacité à choisir des plateformes adaptées à leurs préférences ou à découvrir des contenus spécifiques.
 Nous cherchons donc à fournir une visualisation interactive  qui permettrait aux utilisateurs d'explorer et d'analyser les catalogues de streaming.
 
+Les données utilisées sont issues de [Kaggle](https://www.kaggle.com/datasets/shivamb/netflix-shows)
+
 ## Public cible et objectifs clés
 Le public principal de ce projet inclut :
 
@@ -98,9 +100,6 @@ La répartition des rôles est la suivante :
 - Aida et Ismail se concentreront sur le design et le développement avec D3 
 - Rida se chargera du prétraitement des données essentiel pour garantir des données fiables
 - Massamba sera en soutient sur les différentes parties et assurera la supervision du suivi
-
-## Pistes de conception
-
 
 ## Choix techniques
 
