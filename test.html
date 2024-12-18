@@ -1,0 +1,64 @@
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+
+<script>
+//   d3.json(
+//     "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson"
+//   ).then((data) => {
+//     const countryNames = data.features.map((d) => d.properties.name);
+//     console.log(countryNames);
+//   });
+
+
+//   d3.csv("data/cleaned_datasets/netflix_cleaned.csv").then(data => {
+//   const countrySet = new Set(); // Set pour stocker les pays uniques
+
+//   // Parcourir chaque ligne du CSV
+//   data.forEach(row => {
+//     if (row.country) { // Vérifie si la colonne 'country' existe
+//       row.country
+//         .split(",")                // Sépare la chaîne par des virgules
+//         .map(d => d.trim())        // Enlève les espaces autour des noms
+//         .filter(d => d)            // Filtre les valeurs vides
+//         .forEach(country => countrySet.add(country)); // Ajoute au Set
+//     }
+//   });
+
+//   // Convertir le Set en tableau, trier et afficher dans la console
+//   const uniqueCountries = Array.from(countrySet).sort((a, b) => a.localeCompare(b));
+//   console.log(uniqueCountries);
+//   console.log(uniqueCountries.length)
+// });
+
+
+Promise.all([
+  d3.json("https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json"),
+  d3.csv("data/cleaned_datasets/netflix_cleaned.csv")
+]).then(([geoData, csvData]) => {
+  // Extract country names from GeoJSON
+  const geoCountries = new Set(geoData.features.map(d => d.properties.name));
+  console.log(geoCountries)
+
+
+  // Extract unique country names from CSV
+  const csvCountries = new Set();
+  csvData.forEach(row => {
+    if (row.country) {
+      row.country
+        .split(",")
+        .map(d => d.trim())
+        .filter(d => d)
+        .forEach(country => csvCountries.add(country));
+    }
+  });
+
+  // Find countries in CSV but not in GeoJSON
+  const missingCountries = Array.from(csvCountries).filter(country => !geoCountries.has(country));
+
+  // Print to console
+  console.log("Countries in CSV but not in GeoJSON:", missingCountries);
+  console.log("Total missing countries:", missingCountries.length);
+});
+
+
+
+</script>

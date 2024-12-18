@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Total Shows By Country</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <style>
+      body {
+        background-color: white; /* Fond blanc */
+      }
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0;
+        }
+      }
+    </style>
+  </head>
+  <body
+    class="flex flex-col items-center justify-center min-h-screen text-gray-800"
+  >
+    <!-- Titre Centré -->
+    <h2 class="text-4xl font-bold mb-8 text-center" id="title">
+      Total Shows By Country
+    </h2>
+
+    <!-- Dropdown -->
+    <div class="mb-4">
+      <label for="platform" class="mr-2 font-medium"
+        >Choisissez une plateforme :</label
+      >
+      <select id="platform" class="border px-4 py-2 rounded">
+        <option value="amazon_cleaned.csv">Amazon Prime</option>
+        <option value="disney_cleaned.csv">Disney+</option>
+        <option value="hulu_cleaned.csv">Hulu</option>
+        <option value="netflix_cleaned.csv">Netflix</option>
+      </select>
+    </div>
+
+    <!-- Map Visualization -->
+    <div
+      id="map"
+      class="w-full h-[500px] mb-4 flex items-center justify-center"
+    >
+      <svg id="map-svg" class="block"></svg>
+    </div>
+
+    <!-- Legend -->
+    <div id="legend" class="flex justify-center items-center gap-4"></div>
+
+    <script>
+      const width = 960;
+      const height = 500;
+
+      // Thèmes de couleurs pour chaque plateforme
+      const themes = {
+        "amazon_cleaned.csv": [
+          "#232F3E",
+          "#126C90",
+          "#098AB9",
+          "#0599CD",
+          "#00A8E1",
+        ],
+        "disney_cleaned.csv": [
+          "#0C204F",
+          "#0F2E8F",
+          "#1035AF",
+          "#1139BF",
+          "#113CCF",
+        ],
+        "hulu_cleaned.csv": [
+          "#101820",
+          "#168052",
+          "#19B46B",
+          "#1BCE77",
+          "#1CE783",
+        ],
+        "netflix_cleaned.csv": [
+          "#141414",
+          "#7D0F14",
+          "#B10C14",
+          "#CB0B14",
+          "#E50914",
+        ],
+      };
+
+      // Configuration du SVG avec un fond bleu pour les océans
+      const svg = d3
+        .select("#map-svg")
+        .style("background-color", "#E0F7FA") // Bleu clair pour l'océan
+        .attr("width", "100%")
+        .attr("height", "100%")
+        .attr("viewBox", `0 0 ${width} ${height}`)
+        .attr("preserveAspectRatio", "xMidYMid meet");
+
+      // Projection Mercator centrée
+      const projection = d3
+        .geoMercator()
+        .scale(140) // Ajuste la taille
+        .translate([width / 2, height / 1.5]);
+
+      const path = d3.geoPath().projection(projection);
+
+      const tooltip = d3
+        .select("body")
+        .append("div")
+        .classed(
+          "hidden absolute bg-gray-900 text-white text-sm p-2 rounded shadow-lg",
+          true
+        );
+
+      const platformSelect = document.getElementById("platform");
+
+      // Fonction pour charger les données CSV et mettre à jour la carte
+      function loadPlatformData(fileName) {
+        d3.selectAll("path").remove(); // Nettoyer la carte existante
+        const colors = themes[fileName];
+
+        d3.csv("data/cleaned_datasets/" + fileName).then((data) => {
+          const countryCounts = new Map();
+
+          // Parcourir chaque ligne pour extraire et compter les pays
+          data.forEach((row) => {
+            if (row.country) {
+              row.country
+                .split(",") // Sépare les pays par virgule
+                .map((d) => d.trim()) // Enlève les espaces autour des noms
+                .filter((d) => d && d !== "Bermuda") // Ignore Bermuda et les valeurs vides
+                .forEach((country) => {
+                  switch (country) {
+                    case "United States":
+                      country = "United States of America";
+                      break;
+                    case "West Germany":
+                    case "East Germany":
+                      country = "Germany";
+                      break;
+                    case "Soviet Union":
+                      country = "Russia";
+                      break;
+                    case "Vatican City":
+                      country = "Italy";
+                      break;
+                    case "Hong Kong":
+                      country = "China";
+                      break;
+                  }
+                  countryCounts.set(
+                    country,
+                    (countryCounts.get(country) || 0) + 1
+                  );
+                });
+            }
+          });
+
+          const countryData = Array.from(countryCounts, ([country, shows]) => ({
+            country,
+            shows,
+          }));
+
+          const colorScale = d3
+            .scaleSequential()
+            .domain([
+              d3.min(countryData, (d) => d.shows),
+              d3.max(countryData, (d) => d.shows),
+            ]) // Scale from 0 to max value
+            .interpolator(d3.interpolateRgbBasis(colors));
+
+          // Charger le GeoJSON et dessiner la carte
+          d3.json(
+            "https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json"
+          ).then((worldData) => {
+            svg
+              .selectAll("path")
+              .data(
+                worldData.features.filter(
+                  (d) => d.properties.name !== "Bermuda"
+                )
+              ) // Exclut Bermuda
+              .enter()
+              .append("path")
+              .attr("d", path)
+              .attr("fill", (d) => {
+                const country = countryData.find(
+                  (c) => c.country === d.properties.name
+                );
+                return country ? colorScale(country.shows) : "#ddd";
+              })
+              .attr("stroke", "#999")
+              .on("mouseover", (event, d) => {
+                const country = countryData.find(
+                  (c) => c.country === d.properties.name
+                );
+                if (country) {
+                  tooltip
+                    .html(
+                      `<strong>Country:</strong> ${country.country}<br><strong>Shows:</strong> ${country.shows}`
+                    )
+                    .style("left", event.pageX + 10 + "px")
+                    .style("top", event.pageY + 10 + "px")
+                    .classed("hidden", false);
+                }
+              })
+              .on("mouseout", () => tooltip.classed("hidden", true));
+          });
+        });
+      }
+
+      // Mise à jour de la carte lors de la sélection
+      platformSelect.addEventListener("change", (e) => {
+        loadPlatformData(e.target.value);
+      });
+
+      // Chargement initial de la plateforme par défaut
+      loadPlatformData("amazon_cleaned.csv");
+    </script>
+  </body>
+</html>
