@@ -101,13 +101,13 @@ La répartition des rôles est la suivante :
 - Rida se chargera du prétraitement des données essentiel pour garantir des données fiables
 - Massamba sera en soutient sur les différentes parties et assurera la supervision du suivi
 
-*N.B : Il est apparu qu'on est  5 contributeurs sur ce projet, mais parce que Ismail CHAKRANE utilise deux comptes (Ismailchakrane et Ichakran) de GitHub, mais juste pour mentionner que c'est une seule personne qui fait les commits.
+**N.B : Il est apparu qu'on est  5 contributeurs sur ce projet, mais parce que Ismail CHAKRANE utilise deux comptes (Ismailchakrane et Ichakran) de GitHub, mais juste pour mentionner que c'est une seule personne qui fait les commits.**
 
 ## Choix techniques
 
-- D3.js
-- Tailwind CSS
-- Html
+- HTML / CSS
+- D3.js ([Official Website](https://d3js.org/))
+- Tailwind CSS ([Official Website](https://tailwindcss.com/))
 
 ## Cahier d'avancement
 
