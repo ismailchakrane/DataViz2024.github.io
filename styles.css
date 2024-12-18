@@ -3,6 +3,27 @@
     50% { opacity: 0; }
 }
 
+html, body {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+nav {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.content {
+    flex: 1 0 auto;
+}
+
+footer {
+    flex-shrink: 0;
+}
+
 #banner {
     background-image: url('banner.png');
     background-size: 100% 100%;
@@ -32,3 +53,6 @@
     position: relative;
     z-index: 2;
 }
+
+
+  

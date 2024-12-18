@@ -5,44 +5,51 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>StreamViz: Explore the World of Streaming</title>
   <link rel="stylesheet" href="styles.css"/>
+  <style>
+    
+  </style>
 </head>
 <body>
 
-  <nav class="bg-gray-800 text-white py-4">
+  <nav class="bg-black text-white py-4">
     <div class="container mx-auto flex justify-between items-center px-4">
       <h1 class="text-lg font-bold"><a href="#">StreamViz</a></h1>
-      
       <ul class="flex space-x-4">
-        <li><a href="index.html">Acceuil</a></li>
+        <li><a href="#banner">Projet</a></li>
+        <li><a href="#visualisations">Visualisations</a></li>
         <li><a href="wiki.html">Wiki</a></li>
       </ul>
     </div>
   </nav>
 
-  <div class="text-center" id="banner">
-    <h1 class="text-2xl font-bold mt-8">Visualisation du contenu des plateformes de streaming</h1>
-    <p class="mt-2">Par Ismail Chakrane, Aida Haouas, Rida Asri &amp; Mohamed Massamba SENE</p>
-  </div>
+  <div class="content">
+    <div class="text-center" id="banner">
+      <h1 class="text-2xl font-bold mt-8">Visualisation du contenu des plateformes de streaming</h1>
+      <p class="mt-2">Par Ismail Chakrane, Aida Haouas, Rida Asri &amp; Mohamed Massamba SENE</p>
+    </div>
 
-  <div class="bg-gradient-to-r from-red-500 to-blue-500 text-white">
-    <div class="container mx-auto px-4 py-6">
-      <p>Les utilisateurs des plateformes de streaming, tels que Netflix, souhaitent explorer le contenu disponible de manière personnalisée et analytique. Cependant, il est difficile pour eux de comprendre les caractéristiques du catalogue, comme la diversité des genres, la répartition géographique, les tendances au fil du temps, ou encore les comparatifs avec d'autres plateformes. Ce manque de visibilité limite leur capacité à choisir des plateformes adaptées à leurs préférences ou à découvrir des contenus spécifiques.</p>
-      <p class="mt-4">Les données utilisées sont issues de Kaggle et contiennent les catalogues détaillés pour Netflix, Hulu, Disney+, Amazon Prime permettant des visualisations par plateforme et des comparaisons multi-plateformes sur la diversité et les tendances des contenus.</p>
+    <div class="bg-gradient-to-r from-red-500 to-blue-500 text-white py-6">
+      <div class="container mx-auto px-4">
+        <p>Les utilisateurs des plateformes de streaming, tels que Netflix, souhaitent explorer le contenu disponible de manière personnalisée et analytique. Cependant, il est difficile pour eux de comprendre les caractéristiques du catalogue, comme la diversité des genres, la répartition géographique, les tendances au fil du temps, ou encore les comparatifs avec d'autres plateformes. Ce manque de visibilité limite leur capacité à choisir des plateformes adaptées à leurs préférences ou à découvrir des contenus spécifiques.</p>
+        <p class="mt-4">Les données utilisées sont issues de Kaggle et contiennent les catalogues détaillés pour Netflix, Hulu, Disney+, Amazon Prime permettant des visualisations par plateforme et des comparaisons multi-plateformes sur la diversité et les tendances des contenus.</p>
+      </div>
+    </div>
+
+    <div class="bg-black text-white py-16" id="visualisations">
+    <div class="container mx-auto px-4">
+      <h2 class="text-2xl font-bold mb-4">Visualisations</h2>
+      <p>Explorez les graphiques et analyses interactifs des données des plateformes de streaming.</p>
     </div>
   </div>
 
-  <div class="bg-black text-white" style="min-height: 1000px;">
   </div>
 
-  <div class="bg-white text-black" style="min-height: 500px;">
-  </div>
-
-  <div class="bg-gradient-to-r from-red-500 to-blue-500 text-white mt-8">
-    <div class="container mx-auto text-center py-4">
+  <footer class="bg-gradient-to-r from-red-500 to-blue-500 text-white py-4">
+    <div class="container mx-auto text-center">
       <p>Projet réalisé dans le cadre du cours de Data Visualization par Aurélien Tarard à l’Université Claude Bernard Lyon</p>
       <p class="mt-2">Copyright &copy; 2024</p>
     </div>
-  </div>
+  </footer>
 
   <script src="script.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
