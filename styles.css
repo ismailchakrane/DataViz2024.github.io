@@ -53,16 +53,12 @@ footer {
     position: relative;
     z-index: 2;
 }
-
-
-.bar {
-    fill: steelblue;
-  }
-  .bar:hover {
-    fill: orange;
-  }
-  .axis-label {
-    font-size: 12px;
-    font-weight: bold;
-  }
   
+.tooltip {
+    pointer-events: none;
+}
+
+.text-wrap {
+    white-space: pre-wrap;
+    word-break: break-word;
+}

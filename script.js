@@ -23,8 +23,7 @@ const colorPalettes = {
   },
 };
 
-// Function to update visualization based on platform
-function updateVisualization(platform) {
+function updateColors(platform) {
   const palette = colorPalettes[platform];
 
   d3.select("#visualisations").style("background", palette.background);
@@ -47,94 +46,239 @@ function updateVisualization(platform) {
     .style("font-family", "Arial Black");
 }
 
-// Event listener for platform select
 document.getElementById("platform-select").addEventListener("change", (e) => {
-  updateVisualization(e.target.value);
+  updateColors(e.target.value);
 });
 
-// Call initial visualization
-updateVisualization("netflix");
+updateColors("netflix");
 
 // -----------------------------------------------
-// New Functionality: Dynamic Bar Chart
+// Functionality: Treemap Genre and Age Visualization
 // -----------------------------------------------
+const width = 1460;
+const height = 600;
+const margin = { top: 20, right: 10, bottom: 20, left: 10 };
 
-// Dimensions for bar chart
-const width = 800;
-const height = 400;
-const margin = { top: 20, right: 20, bottom: 50, left: 50 };
+const svgGenre = d3.select('#visualizationGenre')
+  .append('svg')
+  .attr('width', width)
+  .attr('height', height);
 
-// Container for the bar chart
-const chartContainer = d3.select("#chart")
-  .attr("width", width)
-  .attr("height", height);
+const treemapGenre = d3.treemap()
+  .size([width - margin.left - margin.right, height - margin.top - margin.bottom])
+  .padding(2);
 
-// Initialize scales and axes
-const xScale = d3.scaleBand().range([margin.left, width - margin.right]).padding(0.2);
-const yScale = d3.scaleLinear().range([height - margin.bottom, margin.top]);
+const svgCls= d3.select('#visualizationCls')
+  .append('svg')
+  .attr('width', width)
+  .attr('height', height);
 
-const xAxis = chartContainer.append("g").attr("transform", `translate(0,${height - margin.bottom})`);
-const yAxis = chartContainer.append("g").attr("transform", `translate(${margin.left},0)`);
+const treemapCls = d3.treemap()
+  .size([width - margin.left - margin.right, height - margin.top - margin.bottom])
+  .padding(2);
 
-// Function to update bar chart
-function updateBarChart(filteredData) {
-  xScale.domain(filteredData.map(d => d.genre));
-  yScale.domain([0, d3.max(filteredData, d => +d.count)]);
+const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
-  xAxis.call(d3.axisBottom(xScale));
-  yAxis.call(d3.axisLeft(yScale));
+d3.csv('data/cleaned_datasets/streaming_data.csv').then(function(data) {
+    data.forEach(d => {
+        d.year_added = +d.year_added;
+        d.duration_num = +d.duration_num;
+    });
 
-  const bars = chartContainer.selectAll(".bar").data(filteredData, d => d.genre);
+    const years = [...new Set(data.map(d => d.year_added))].sort();
+    const continents = ['All', ...new Set(data.map(d => d.continent))];
+    const types = ['All', ...new Set(data.map(d => d.type))];
 
-  bars
-    .transition().duration(500)
-    .attr("x", d => xScale(d.genre))
-    .attr("y", d => yScale(d.count))
-    .attr("width", xScale.bandwidth())
-    .attr("height", d => height - margin.bottom - yScale(d.count));
+    setupFilters(years, continents, types, "Genre");
+    setupFilters(years, continents, types, "Cls");
+    updateVisualizationGenre(data);
+    updateVisualizationCls(data);
 
-  bars.enter().append("rect")
-    .attr("class", "bar")
-    .attr("x", d => xScale(d.genre))
-    .attr("y", d => yScale(d.count))
-    .attr("width", xScale.bandwidth())
-    .attr("height", d => height - margin.bottom - yScale(d.count))
-    .style("fill", "#69b3a2");
+    document.getElementById('yearSliderGenre').addEventListener('input', () => updateVisualizationGenre(data));
+    document.getElementById('continentSelectGenre').addEventListener('change', () => updateVisualizationGenre(data));
+    document.getElementById('typeSelectGenre').addEventListener('change', () => updateVisualizationGenre(data));
 
-  bars.exit().remove();
+    document.getElementById('yearSliderCls').addEventListener('input', () => updateVisualizationCls(data));
+    document.getElementById('continentSelectCls').addEventListener('change', () => updateVisualizationCls(data));
+    document.getElementById('typeSelectCls').addEventListener('change', () => updateVisualizationCls(data));
+});
+
+function setupFilters(years, continents, types, info) {
+    const yearSlider = document.getElementById('yearSlider'+info);
+    yearSlider.min = Math.min(...years);
+    yearSlider.max = Math.max(...years);
+    yearSlider.value = yearSlider.max;
+    document.getElementById('yearValue'+info).textContent = yearSlider.value;
+
+    const continentSelect = document.getElementById('continentSelect'+info);
+    continentSelect.innerHTML = continents.map(c => 
+        `<option value="${c}">${c}</option>`).join('');
+
+    const typeSelect = document.getElementById('typeSelect'+info);
+    typeSelect.innerHTML = types.map(t => 
+        `<option value="${t}">${t}</option>`).join('');
 }
 
-d3.csv("data/cleaned_datasets/steaming_data.csv").then(data => {
-  const years = [...new Set(data.map(d => d.year_added))].sort((a, b) => b - a);
+function updateVisualizationGenre(data) {
+    const yearValue = document.getElementById('yearSliderGenre').value;
+    const continentValue = document.getElementById('continentSelectGenre').value;
+    const typeValue = document.getElementById('typeSelectGenre').value;
+    document.getElementById('yearValueGenre').textContent = yearValue;
 
-  const yearSelect = d3.select("#year-select");
-  years.forEach(year => {
-    yearSelect.append("option").attr("value", year).text(year);
+    const filtered = data.filter(d => {
+        return d.year_added == yearValue &&
+            (continentValue === 'All' || d.continent === continentValue) &&
+            (typeValue === 'All' || d.type === typeValue);
+    });
+
+    const genreGroups = d3.group(filtered, d => d.genre);
+    let hierarchyData = {
+        children: Array.from(genreGroups, ([genre, items]) => ({
+            genre,
+            value: items.length,
+            items
+        }))
+    };
+
+    hierarchyData.children.sort((a, b) => b.value - a.value);
+    hierarchyData.children = hierarchyData.children.slice(0, 25);
+
+    const root = d3.hierarchy(hierarchyData)
+        .sum(d => d.value);
+
+    treemapGenre(root);
+
+    const nodes = svgGenre.selectAll('g')
+        .data(root.leaves(), d => d.data.genre);
+
+    nodes.exit().remove();
+
+    const nodesEnter = nodes.enter()
+        .append('g');
+
+    nodesEnter.append('rect');
+    nodesEnter.append('text');
+
+    const nodesUpdate = nodes.merge(nodesEnter)
+        .transition()
+        .duration(750)
+        .attr('transform', d => `translate(${d.x0},${d.y0})`);
+
+    nodesUpdate.select('rect')
+        .attr('width', d => d.x1 - d.x0)
+        .attr('height', d => d.y1 - d.y0)
+        .style('fill', d => colorScale(d.data.genre));
+    
+
+    nodesUpdate.select('text')
+        .attr('x', 5)
+        .attr('y', 20)
+        .text(d => `${d.data.genre} (${d.data.value})`)
+        .attr('class', 'text-wrap')
+        .style('font-size', '6px')
+        .style('fill', 'white');
+
+    const allNodes = svgGenre.selectAll('g');
+    allNodes.selectAll('rect')
+        .on('mouseover', showTooltipGenre)
+        .on('mouseout', hideTooltip);
+}
+
+function updateVisualizationCls(data) {
+  const yearValue = document.getElementById('yearSliderCls').value;
+  const continentValue = document.getElementById('continentSelectCls').value;
+  const typeValue = document.getElementById('typeSelectCls').value;
+  document.getElementById('yearValueCls').textContent = yearValue;
+
+  const filtered = data.filter(d => {
+      return d.year_added == yearValue &&
+          (continentValue === 'All' || d.continent === continentValue) &&
+          (typeValue === 'All' || d.type === typeValue);
   });
 
-  function filterData() {
-    let filtered = data;
+  const ratingGroups = d3.group(filtered, d => d.rating);
+  let hierarchyData = {
+      children: Array.from(ratingGroups, ([rating, items]) => ({
+          rating,
+          value: items.length,
+          items
+      }))
+  };
 
-    const selectedPlatform = d3.select("#platform-select").node().value;
-    if (selectedPlatform !== "all") {
-      filtered = filtered.filter(d => d.platform === selectedPlatform);
+  hierarchyData.children.sort((a, b) => b.value - a.value);
+  hierarchyData.children = hierarchyData.children.slice(0, 16);
+
+  const root = d3.hierarchy(hierarchyData)
+      .sum(d => d.value);
+
+  treemapCls(root);
+
+  const nodes = svgCls.selectAll('g')
+      .data(root.leaves(), d => d.data.rating);
+
+  nodes.exit().remove();
+
+  const nodesEnter = nodes.enter()
+      .append('g');
+
+  nodesEnter.append('rect');
+  nodesEnter.append('text');
+
+  const nodesUpdate = nodes.merge(nodesEnter)
+      .transition()
+      .duration(750)
+      .attr('transform', d => `translate(${d.x0},${d.y0})`);
+
+  nodesUpdate.select('rect')
+      .attr('width', d => d.x1 - d.x0)
+      .attr('height', d => d.y1 - d.y0)
+      .style('fill', d => colorScale(d.data.rating));
+  
+
+  nodesUpdate.select('text')
+      .attr('x', 5)
+      .attr('y', 20)
+      .text(d => `${d.data.rating} (${d.data.value})`)
+      .attr('class', 'text-wrap')
+      .style('font-size', '6px')
+      .style('fill', 'white');
+
+  const allNodes = svgCls.selectAll('g');
+  allNodes.selectAll('rect')
+      .on('mouseover', showTooltipRating)
+      .on('mouseout', hideTooltip);
+}
+
+function showTooltipGenre(event, d) {
+    const platformCounts = d3.rollup(d.data.items, v => v.length, d => d.platform);
+    let content = `<div class="bg-white p-3 rounded shadow-lg border border-gray-200">
+        <p class="font-bold mb-2">${d.data.genre}</p>`;
+    for (const [platform, count] of platformCounts) {
+        content += `<p>${platform}: ${count}</p>`;
     }
+    content += `<p class="font-bold mt-2">Total: ${d.data.value}</p></div>`;
+    d3.select('body').append('div')
+        .attr('class', 'tooltip absolute z-50')
+        .style('left', (event.pageX + 10) + 'px')
+        .style('top', (event.pageY - 10) + 'px')
+        .html(content);
+}
 
-    const selectedType = d3.select("#type-select").node().value;
-    if (selectedType !== "all") {
-      filtered = filtered.filter(d => d.type === selectedType);
-    }
-
-    const selectedYear = d3.select("#year-select").node().value;
-    if (selectedYear !== "all") {
-      filtered = filtered.filter(d => d.year_added === selectedYear);
-    }
-
-    updateBarChart(filtered);
+function showTooltipRating(event, d) {
+  const platformCounts = d3.rollup(d.data.items, v => v.length, d => d.platform);
+  let content = `<div class="bg-white p-3 rounded shadow-lg border border-gray-200">
+      <p class="font-bold mb-2">${d.data.rating}</p>`;
+  for (const [platform, count] of platformCounts) {
+      content += `<p>${platform}: ${count}</p>`;
   }
+  content += `<p class="font-bold mt-2">Total: ${d.data.value}</p></div>`;
+  d3.select('body').append('div')
+      .attr('class', 'tooltip absolute z-50')
+      .style('left', (event.pageX + 10) + 'px')
+      .style('top', (event.pageY - 10) + 'px')
+      .html(content);
+}
 
-  d3.selectAll("#platform-select, #type-select, #year-select").on("change", filterData);
-
-  filterData();
-});
-
+function hideTooltip() {
+    d3.selectAll('.tooltip').remove();
+}

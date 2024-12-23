@@ -56,19 +56,75 @@
           </div>
         </div>
         <div id="viz" class="mt-8 flex items-center justify-center"></div>
-      </div>
     </div>
+  </div>
 
-    <div class="bg-white pt-4 pb-16">
-      <div class="container mx-auto px-4 flex flex-wrap">
-        <div class="w-full sm:w-1/4 px-4">
-          <div class="bg-gray-100 p-4 rounded-lg shadow">
-            
-          </div>
-          </div>
+  <div class="bg-white p-6">
+    <div class="flex">
+        <div id="visualizationGenre" class="overflow-auto"></div>
+        <div class="ml-6 w-64">
+            <div class="mb-4">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Année: <span id="yearValueGenre" class="ml-2"></span>
+                </label>
+                <input type="range" id="yearSliderGenre" 
+                        class="w-full h-2 rounded-lg cursor-pointer">
+            </div>
+
+            <div class="mb-4">
+                <label for="continentSelectGenre" class="block text-sm font-semibold text-gray-700 mb-2">
+                    Continent
+                </label>
+                <select id="continentSelectGenre" class="w-full rounded-md border border-gray-300 p-2">
+                </select>
+            </div>
+
+            <div>
+                <label for="typeSelectGenre" class="block text-sm font-semibold text-gray-700 mb-2">
+                    Type
+                </label>
+                <select id="typeSelectGenre" class="w-full rounded-md border border-gray-300 p-2">
+                </select>
+            </div>
         </div>
-      </div>
     </div>
+    <h4 class="text-center font-bold mb-8 text-gray-800">
+      Répartition du contenu par genre
+    </h4>
+  </div>
+
+  <div class="bg-white mt-8 p-6">
+    <div class="flex">
+        <div id="visualizationCls" class="overflow-auto"></div>
+        <div class="ml-6 w-64">
+            <div class="mb-4">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Année: <span id="yearValueCls" class="ml-2"></span>
+                </label>
+                <input type="range" id="yearSliderCls" 
+                        class="w-full h-2 rounded-lg cursor-pointer">
+            </div>
+
+            <div class="mb-4">
+                <label for="continentSelectCls" class="block text-sm font-semibold text-gray-700 mb-2">
+                    Continent
+                </label>
+                <select id="continentSelectCls" class="w-full rounded-md border border-gray-300 p-2">
+                </select>
+            </div>
+
+            <div>
+                <label for="typeSelectCls" class="block text-sm font-semibold text-gray-700 mb-2">
+                    Type
+                </label>
+                <select id="typeSelectCls" class="w-full rounded-md border border-gray-300 p-2">
+                </select>
+            </div>
+        </div>
+    </div>
+    <h4 class="text-center font-bold mb-8 text-gray-800">
+      Répartition du contenu par classification d'age
+    </h4>
   </div>
 
   <footer class="bg-gradient-to-r from-red-500 to-blue-500 text-white py-4">

@@ -18,13 +18,12 @@
 </head>
 <body class="bg-gray-100">
     <div class="container mx-auto px-4 py-8 max-w-6xl">
-        <h1 class="text-3xl font-bold mb-8 text-gray-800">Analysis by Genre</h1>
         
         <div class="bg-white p-6 rounded-lg shadow-md mb-8">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">
-                        Year: <span id="yearValue" class="ml-2 text-indigo-600"></span>
+                        Année: <span id="yearValue" class="ml-2"></span>
                     </label>
                     <input type="range" id="yearSlider" 
                            class="w-full h-2 rounded-lg cursor-pointer">
@@ -46,9 +45,12 @@
                     </select>
                 </div>
             </div>
+
+            <div id="visualization-genre" class="mt-4 overflow-auto"></div>
+
+            <h4 class="text-center font-bold mb-8 text-gray-800">Répartition du contenu par genre</h4>
         </div>
-        
-        <div id="visualization" class="bg-white p-6 rounded-lg shadow-md overflow-auto"></div>
+    
     </div>
 
     <script>
@@ -56,7 +58,7 @@
         const height = 600;
         const margin = { top: 20, right: 10, bottom: 20, left: 10 };
 
-        const svg = d3.select('#visualization')
+        const svg = d3.select('#visualization-genre')
             .append('svg')
             .attr('width', width)
             .attr('height', height);
