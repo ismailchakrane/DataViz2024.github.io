@@ -79,7 +79,7 @@ const treemapCls = d3.treemap()
 
 const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
-d3.csv('data/cleaned_datasets/streaming_data.csv').then(function(data) {
+d3.csv('streaming_data.csv').then(function(data) {
     data.forEach(d => {
         d.year_added = +d.year_added;
         d.duration_num = +d.duration_num;
