@@ -53,10 +53,10 @@ document.getElementById("platform-select").addEventListener("change", (e) => {
 updateColors("netflix");
 
 // -----------------------------------------------
-// Functionality: Treemap Genre and Age Visualization
+// Treemap Genre and Age Visualization
 // -----------------------------------------------
-const width = 1460;
-const height = 600;
+const width = 1260;
+const height = 460;
 const margin = { top: 20, right: 10, bottom: 20, left: 10 };
 
 const svgGenre = d3.select('#visualizationGenre')
@@ -282,3 +282,223 @@ function showTooltipRating(event, d) {
 function hideTooltip() {
     d3.selectAll('.tooltip').remove();
 }
+
+// -----------------------------------------------
+// Evolution du contenu
+// -----------------------------------------------
+
+const platformColors = {
+    "Netflix": "#E50914",
+    "Hulu": "#1CE783",
+    "Disney": "#113CCF",
+    "Amazon": "#FF9900"
+};
+
+function createChart(containerId, data, metric, yAxisLabel) {
+    const margin = {top: 40, right: 120, bottom: 60, left: 60};
+    const width = 800 - margin.left - margin.right;
+    const height = 400 - margin.top - margin.bottom;
+
+    d3.select(`#${containerId}`).selectAll("*").remove();
+
+    const svg = d3.select(`#${containerId}`)
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    const x0 = d3.scaleBand()
+        .domain(d3.range(2006, 2022))
+        .rangeRound([0, width])
+        .paddingOuter(0.1)
+        .paddingInner(0.1);
+
+    const x1 = d3.scaleBand()
+        .domain(Object.keys(platformColors))
+        .padding(0.05);
+
+    const y = d3.scaleLinear()
+        .domain([0, d3.max(data, d => d[metric])])
+        .nice()
+        .range([height, 0]);
+
+    svg.append("g")
+        .attr("class", "x-axis")
+        .attr("transform", `translate(0,${height})`)
+        .call(d3.axisBottom(x0))
+        .selectAll("text")
+        .style("text-anchor", "end")
+        .attr("dx", "-.8em")
+        .attr("dy", ".15em")
+        .attr("transform", "rotate(-45)");
+
+    svg.append("g")
+        .attr("class", "y-axis")
+        .call(d3.axisLeft(y));
+
+    svg.append("text")
+        .attr("class", "x-label")
+        .attr("text-anchor", "middle")
+        .attr("x", width / 2)
+        .attr("y", height + margin.bottom - 10)
+        .text("Année");
+
+    svg.append("text")
+        .attr("class", "y-label")
+        .attr("text-anchor", "middle")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -height / 2)
+        .attr("y", -margin.left + 20)
+        .text(yAxisLabel);
+
+    const tooltip = d3.select("body")
+        .append("div")
+        .attr("class", "tooltip-common")
+        .style("opacity", 0);
+
+    x1.rangeRound([0, x0.bandwidth()]);
+    const groupedData = d3.group(data, d => d.year_added);
+
+    const yearGroups = svg.selectAll(".year-group")
+        .data(Array.from(groupedData))
+        .join("g")
+        .attr("class", "year-group")
+        .attr("transform", d => `translate(${x0(d[0])},0)`);
+
+    yearGroups.selectAll("rect")
+        .data(d => d[1])
+        .join("rect")
+        .attr("x", d => x1(d.platform))
+        .attr("width", x1.bandwidth())
+        .attr("y", d => y(d[metric]))
+        .attr("height", d => height - y(d[metric]))
+        .attr("fill", d => platformColors[d.platform])
+        .on("mouseover", function(event, d) {
+            tooltip.transition()
+                .duration(200)
+                .style("opacity", .9);
+            tooltip.html(`
+                Année: ${d.year_added}<br/>
+                Plateforme: ${d.platform}<br/>
+                ${yAxisLabel}: ${d[metric]}
+            `)
+            .style("left", (event.pageX + 10) + "px")
+            .style("top", (event.pageY - 28) + "px");
+        })
+        .on("mouseout", function() {
+            tooltip.transition()
+                .duration(500)
+                .style("opacity", 0);
+        });
+
+    const legend = svg.append("g")
+        .attr("class", "legend")
+        .attr("transform", `translate(${width + 10}, 0)`);
+
+    Object.entries(platformColors).forEach(([platform, color], i) => {
+        const legendRow = legend.append("g")
+            .attr("transform", `translate(0, ${i * 20})`);
+
+        legendRow.append("rect")
+            .attr("width", 15)
+            .attr("height", 15)
+            .attr("fill", color);
+
+        legendRow.append("text")
+            .attr("x", 20)
+            .attr("y", 12)
+            .attr("class", "text-sm")
+            .text(platform);
+    });
+}
+
+d3.csv("streaming_data.csv").then(function(rawData) {
+    const continents = ['All', ...new Set(rawData.map(d => d.continent))];
+    const audiences = ['All', ...new Set(rawData.map(d => d.audience))];
+
+    const continentSelect = document.getElementById('continent-select');
+    continentSelect.innerHTML = continents.map(c => 
+        `<option value="${c}">${c}</option>`).join('');
+
+    const typeSelect = document.getElementById('audience-select');
+    typeSelect.innerHTML = audiences.map(t => 
+            `<option value="${t}">${t}</option>`).join('');
+
+    function updateCharts(selectedContinent, selectedAudience) {
+        let filteredData = rawData;
+        
+        if (selectedContinent !== 'All') {
+            filteredData = filteredData.filter(d => d.continent === selectedContinent);
+        }
+        if (selectedAudience !== 'All') {
+            filteredData = filteredData.filter(d => d.audience === selectedAudience);
+        }
+
+        const contentQuantityData = d3.rollup(
+            filteredData,
+            v => v.length,
+            d => d.year_added,
+            d => d.platform
+        );
+
+        const movieDurationData = d3.rollup(
+            filteredData.filter(d => d.type === "Movie"),
+            v => d3.sum(v, d => parseInt(d.duration_num)),
+            d => d.year_added,
+            d => d.platform
+        );
+
+        const tvSeasonsData = d3.rollup(
+            filteredData.filter(d => d.type === "TV Show"),
+            v => d3.sum(v, d => parseInt(d.duration_num)),
+            d => d.year_added,
+            d => d.platform
+        );
+
+        createChart(
+            "content-quantity-chart", 
+            processRollupData(contentQuantityData), 
+            "value",
+            "Nombre de titres"
+        );
+        
+        createChart(
+            "movie-duration-chart", 
+            processRollupData(movieDurationData), 
+            "value",
+            "Durée (minutes)"
+        );
+        
+        createChart(
+            "tv-seasons-chart", 
+            processRollupData(tvSeasonsData), 
+            "value",
+            "Nombre de saisons"
+        );
+    }
+
+    function processRollupData(rollupData) {
+        const processedData = [];
+        rollupData.forEach((yearValue, year) => {
+            yearValue.forEach((value, platform) => {
+                processedData.push({
+                    year_added: +year,
+                    platform: platform,
+                    value: value
+                });
+            });
+        });
+        return processedData;
+    }
+
+    d3.select("#continent-select").on("change", function() {
+        updateCharts(this.value, d3.select("#audience-select").property("value"));
+    });
+
+    d3.select("#audience-select").on("change", function() {
+        updateCharts(d3.select("#continent-select").property("value"), this.value);
+    });
+
+    updateCharts('All', 'All');
+});

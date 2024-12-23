@@ -20,6 +20,7 @@
   </nav>
 
   <div class="content">
+
     <div class="text-center" id="banner">
       <h1 class="text-2xl font-bold mt-8">Visualisation du contenu des plateformes de streaming</h1>
       <p class="mt-2">Par Ismail Chakrane, Aida Haouas, Rida Asri &amp; Mohamed Massamba SENE</p>
@@ -126,6 +127,50 @@
       Répartition du contenu par classification d'age
     </h4>
   </div>
+
+  <div class="container mx-auto p-6">
+    <div class="grid grid-cols-5 gap-6">
+
+        <div class="col-span-4 space-y-6">
+            <div class="bg-white p-6">
+                <h2 class="text-lg font-semibold mb-4">Quantité de contenu par année</h2>
+                <div id="content-quantity-chart"></div>
+            </div>
+
+            <div class="bg-white p-6">
+                <h2 class="text-lg font-semibold mb-4">Durée des films par année (en minutes)</h2>
+                <div id="movie-duration-chart"></div>
+            </div>
+
+            <div class="bg-white p-6">
+                <h2 class="text-lg font-semibold mb-4">Nombre de saisons par année</h2>
+                <div id="tv-seasons-chart"></div>
+            </div>
+        </div>
+
+        <div class="col-span-1 space-y-6">
+            <div class="bg-white p-6 space-y-6">
+              <div class="mb-4">
+                <label for="audience-select" class="block text-sm font-semibold text-gray-700 mb-2">
+                  Audience
+                </label>
+                <select id="audience-select" class="w-full rounded-md border border-gray-300 p-2">
+                </select>
+              </div>
+
+              <div>
+                <label for="continent-select" class="block text-sm font-semibold text-gray-700 mb-2">
+                  Continent
+                </label>
+                <select id="continent-select" class="w-full rounded-md border border-gray-300 p-2">
+                </select>
+              </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+
 
   <footer class="bg-gradient-to-r from-red-500 to-blue-500 text-white py-4">
     <div class="container mx-auto text-center">
