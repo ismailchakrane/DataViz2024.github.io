@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grouped Bar Chart with D3.js</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+  <div class="container mx-auto">
+    <h1 class="text-2xl font-bold text-center mb-8">Content by Platform Over the Years</h1>
+
+    <div class="flex justify-center mb-6">
+      <label for="continent" class="mr-4 font-semibold">Filter by Continent:</label>
+      <select id="continent" class="p-2 border rounded-lg shadow">
+        <option value="All">All</option>
+        <option value="North America">North America</option>
+        <option value="Africa">Africa</option>
+        <option value="Asia">Asia</option>
+      </select>
+    </div>
+
+    <div class="bg-white shadow-md rounded-lg p-4">
+      <svg id="chart"></svg>
+    </div>
+
+    <div id="tooltip" class="absolute invisible bg-white border border-gray-300 p-2 rounded-lg shadow text-sm"></div>
+  </div>
+
+  <script>
+    const margin = { top: 50, right: 30, bottom: 70, left: 60 };
+    const width = 900 - margin.left - margin.right;
+    const height = 500 - margin.top - margin.bottom;
+
+    const svg = d3.select('#chart')
+      .attr('width', width + margin.left + margin.right)
+      .attr('height', height + margin.top + margin.bottom)
+      .append('g')
+      .attr('transform', `translate(${margin.left},${margin.top})`);
+
+    const data = [
+      { year: 2021, platform: 'Netflix', count: 3, continent: 'North America' },
+      { year: 2021, platform: 'Disney', count: 1, continent: 'Africa' },
+      { year: 2021, platform: 'Hulu', count: 1, continent: 'North America' },
+      { year: 2021, platform: 'Prime', count: 1, continent: 'North America' },
+    ];
+
+    let selectedContinent = 'All';
+    const colors = { Netflix: 'red', Hulu: 'green', Disney: 'blue', Prime: 'orange' };
+
+    function updateChart(continent) {
+      const filteredData = continent === 'All' ? data : data.filter(d => d.continent === continent);
+
+      const platforms = ['Netflix', 'Hulu', 'Disney', 'Prime'];
+      const years = [...new Set(filteredData.map(d => d.year))];
+
+      const groupedData = d3.groups(filteredData, d => d.year);
+
+      const x0 = d3.scaleBand().domain(years).range([0, width]).padding(0.2);
+      const x1 = d3.scaleBand().domain(platforms).range([0, x0.bandwidth()]).padding(0.1);
+      const y = d3.scaleLinear().domain([0, d3.max(filteredData, d => d.count)]).nice().range([height, 0]);
+
+      svg.selectAll('*').remove();
+      svg.append('g').call(d3.axisBottom(x0).tickFormat(d3.format('d'))).attr('transform', `translate(0,${height})`);
+      svg.append('g').call(d3.axisLeft(y));
+
+      svg.selectAll('.bar-group')
+        .data(groupedData)
+        .enter()
+        .append('g')
+        .attr('transform', d => `translate(${x0(d[0])},0)`)
+        .selectAll('rect')
+        .data(d => d[1])
+        .enter()
+        .append('rect')
+        .attr('x', d => x1(d.platform))
+        .attr('y', d => y(d.count))
+        .attr('width', x1.bandwidth())
+        .attr('height', d => height - y(d.count))
+        .attr('fill', d => colors[d.platform])
+        .on('mouseover', (event, d) => {
+          d3.select('#tooltip')
+            .style('visibility', 'visible')
+            .html(`Platform: ${d.platform}<br>Count: ${d.count}`)
+            .style('top', `${event.pageY - 10}px`)
+            .style('left', `${event.pageX + 10}px`);
+        })
+        .on('mouseout', () => d3.select('#tooltip').style('visibility', 'hidden'));
+
+      const legend = svg.selectAll('.legend')
+        .data(platforms)
+        .enter()
+        .append('g')
+        .attr('transform', (d, i) => `translate(0, ${i * 20})`);
+
+      legend.append('rect').attr('x', width - 10).attr('width', 10).attr('height', 10).attr('fill', d => colors[d]);
+      legend.append('text').attr('x', width - 20).attr('y', 5).attr('dy', '0.35em').style('text-anchor', 'end').text(d => d);
+    }
+
+    d3.select('#continent').on('change', function () {
+      selectedContinent = this.value;
+      updateChart(selectedContinent);
+    });
+
+    updateChart('All');
+  </script>
+</body>
+</html>
