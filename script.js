@@ -295,7 +295,7 @@ const platformColors = {
 };
 
 function createChart(containerId, data, metric, yAxisLabel) {
-    const margin = {top: 40, right: 120, bottom: 60, left: 60};
+    const margin = {top: 40, right: 120, bottom: 60, left: 80};
     const width = 800 - margin.left - margin.right;
     const height = 400 - margin.top - margin.bottom;
 
