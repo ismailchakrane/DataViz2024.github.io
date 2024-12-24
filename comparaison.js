@@ -239,7 +239,7 @@ const platformColors = {
     "Netflix": "#E50914",
     "Hulu": "#1CE783",
     "Disney": "#113CCF",
-    "Amazon": "#FF9900"
+    "Amazon": "#00A8E1"
 };
 
 function createChart(containerId, data, metric, yAxisLabel) {

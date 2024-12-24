@@ -67,9 +67,8 @@
         </div>
     </div>
     <script>
-        const data = "data/cleaned_datasets/netflix_cleaned.csv";
+        const data = "../streaming_data.csv";
 
-        // Configuration du graphique
         const width = 400, height = 400, radius = Math.min(width, height) / 2;
 
         const svg = d3.select("#donutChart")
@@ -92,27 +91,22 @@
             .innerRadius(radius * 0.8)
             .outerRadius(radius * 0.8);
 
-        // Formatter pour afficher les chiffres en "K"
         function formatCount(value) {
             return (value / 1000).toFixed(2) + "K";
         }
-            // Charger les données locales
             d3.csv(data).then(data => {
             console.log("Données brutes:", data);
 
-            // Extraire et grouper les données par "type"
             const counts = d3.rollup(data, v => v.length, d => d.type.trim());
             const formattedData = Array.from(counts, ([type, count]) => ({ type, count }));
             console.log("Données formatées:", formattedData);
 
-            // Dessiner les segments du donut
             svg.selectAll("path")
                 .data(pie(formattedData))
                 .enter().append("path")
                 .attr("fill", d => color(d.data.type))
                 .attr("d", arc);
 
-            // Ajouter les étiquettes de texte
             svg.selectAll("text.label")
                 .data(pie(formattedData))
                 .enter().append("text")

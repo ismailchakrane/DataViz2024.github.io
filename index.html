@@ -14,6 +14,7 @@
       <ul class="flex space-x-4">
         <li><a href="#">Projet</a></li>
         <li><a href="#visualisations">Visualisations</a></li>
+        <li><a href="comparaison.html">Comparaisons</a></li>
         <li><a href="wiki.html">Wiki</a></li>
       </ul>
     </div>
@@ -41,10 +42,10 @@
           id="platform-select"
           class="appearance-none w-full bg-gray-800 text-gray-200 border border-gray-700 hover:border-red-500 px-4 py-2 pr-8 rounded-lg leading-tight focus:outline-none focus:border-red-500 focus:ring focus:ring-red-500/50 transition duration-300"
         >
-          <option value="netflix">Netflix</option>
-          <option value="amazon">Amazon Prime Video</option>
-          <option value="disney">Disney+</option>
-          <option value="hulu">Hulu</option>
+          <option value="Netflix">Netflix</option>
+          <option value="Amazon">Amazon Prime Video</option>
+          <option value="Disney">Disney+</option>
+          <option value="Hulu">Hulu</option>
         </select>
         <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
           <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -58,179 +59,65 @@
       </div>
     </div>
 
-    <div class="mt-8 grid gap-4 border border-gray-300 p-4 shadow-md">
-      <div class="grid grid-cols-3 gap-4">
+    <div class="mt-8 grid gap-4 p-4">
+      <div class="grid grid-cols-[6fr_3fr_3fr] gap-4">
         <div>
           <label for="year-slider" class="block text-sm font-semibold text-white mb-2">
-            Année: <span id="year-slider-value" class="ml-2"></span>
+            Année
           </label>
-          <input id="year-slider" type="range" min="2006" max="2023" value="2023" class="w-full">
+          <input id="year-slider" type="range" class="w-full">
         </div>
         <div>
           <label for="audience-select-1" class="block text-sm font-semibold text-white mb-2">
             Audience
           </label>
-          <select id="audience-select-1" class="w-full rounded-md border border-white p-2 bg-transparent text-white">
-            <option value="all">All</option>
-            <option value="kids">Kids</option>
-            <option value="adults">Adults</option>
-            <option value="teens">Teens</option>
+          <select id="audience-select-1" class="w-full rounded-md border border-gray-300 p-2 bg-transparent text-white">
           </select>
         </div>
         <div>
           <label for="continent-select-1" class="block text-sm font-semibold text-white mb-2">
             Continent
           </label>
-          <select id="continent-select-1" class="w-full rounded-md border border-white p-2 bg-transparent text-white">
-            <option value="all">All</option>
-            <option value="europe">Europe</option>
-            <option value="north-america">North America</option>
-            <option value="south-america">South America</option>
-            <option value="asia">Asia</option>
-            <option value="africa">Africa</option>
-            <option value="oceania">Oceania</option>
+          <select id="continent-select-1" class="w-full rounded-md border border-gray-300 p-2 bg-transparent text-white">
           </select>
         </div>
       </div>
       <div class="grid grid-cols-5 gap-4">
-        <div class="border border-gray-400 shadow-md p-4">Item 1</div>
-        <div class="border border-gray-400 shadow-md p-4">Item 2</div>
-        <div class="border border-gray-400 shadow-md p-4">Item 3</div>
-        <div class="border border-gray-400 shadow-md p-4">Item 4</div>
-        <div class="border border-gray-400 shadow-md p-4">Item 5</div>
-      </div>
-      <div class="grid grid-cols-1">
-        <div class="border border-gray-400 shadow-md p-4">Item 6</div>
+        <div class="p-4">
+          <h4 class="text-center font-bold mb-4 text-white">Total Titres</h4>
+          <h4 class="text-3xl text-center font-bold" id="titlesValue1"></h4>
+        </div>
+        <div class="p-4">
+          <h4 class="text-center font-bold mb-4 text-white">Total Ratings</h4>
+          <h4 class="text-3xl text-center font-bold" id="ratingsValue1"></h4>
+        </div>
+        <div class="p-4">
+          <h4 class="text-center font-bold mb-4 text-white">Total Genres</h4>
+          <h4 class="text-3xl text-center font-bold" id="genreValue1"></h4>
+        </div>
+        <div class="p-4">
+          <h4 class="text-center font-bold mb-4 text-white">Total Pays</h4>
+          <h4 class="text-3xl text-center font-bold" id="countryValue1"></h4>
+        </div>
+        <div class="p-4">
+          <h4 class="text-center font-bold mb-4 text-white">Année</h4>
+          <h4 class="text-3xl text-center font-bold" id="yearValue1"></h4>
+        </div>
       </div>
       <div class="grid grid-cols-3 gap-4">
-        <div class="border border-gray-400 shadow-md p-4">Item 7</div>
-        <div id="viz" class="border border-gray-400 shadow-md p-4">Item 8</div>
-        <div class="border border-gray-400 shadow-md p-4">Item 9</div>
+        <div id="release" class="text-center p-4">Nombre de sorties par année</div>
+        <div id="platform" class="p-4"></div>
+        <div id="donut" class="text-center p-4">Répartition du contenu par type</div>
       </div>
       <div class="grid grid-cols-2 gap-4">
-        <div class="border border-gray-400 shadow-md p-4">Item 10</div>
-        <div class="border border-gray-400 shadow-md p-4">Item 11</div>
+        <div id="genres" class="text-center p-4">Répartition du contenu par genre</div>
+        <div id="ratings" class="text-center p-4">Répartition du contenu par classification</div>
       </div>
     </div>
-  </div>
-  
-  <div class="bg-white p-6 text-center">
-    <h1 class="text-2xl font-bold mt-8">Comparaison globale</h1>
-    <div class="container mx-auto">
-      <p>Cette section fournit une analyse comparative des catalogues de contenu des principales plateformes de streaming. Elle explore des métriques clés telles que la répartition des genres, les classifications d'âge, et les tendances temporelles. Utilisez les filtres interactifs pour affiner votre exploration par année, continent ou type de contenu.</p>
+    <div class="grid grid-cols-1">
+      <div id="map" class="border border-gray-400 p-4"></div>
     </div>
   </div>
-
-  <div class="bg-white p-6">
-    <div class="flex">
-        <div id="visualizationGenre" class="overflow-auto"></div>
-        <div class="ml-6 w-64">
-            <div class="mb-4">
-                <label class="block text-sm font-semibold text-gray-700 mb-2">
-                    Année: <span id="yearValueGenre" class="ml-2"></span>
-                </label>
-                <input type="range" id="yearSliderGenre" 
-                        class="w-full h-2 rounded-lg cursor-pointer">
-            </div>
-
-            <div class="mb-4">
-                <label for="continentSelectGenre" class="block text-sm font-semibold text-gray-700 mb-2">
-                    Continent
-                </label>
-                <select id="continentSelectGenre" class="w-full rounded-md border border-gray-300 p-2">
-                </select>
-            </div>
-
-            <div>
-                <label for="typeSelectGenre" class="block text-sm font-semibold text-gray-700 mb-2">
-                    Type
-                </label>
-                <select id="typeSelectGenre" class="w-full rounded-md border border-gray-300 p-2">
-                </select>
-            </div>
-        </div>
-    </div>
-    <h4 class="text-center font-bold mb-8 text-gray-800">
-      Répartition du contenu par genre
-    </h4>
-  </div>
-
-  <div class="bg-white mt-8 p-6">
-    <div class="flex">
-        <div id="visualizationCls" class="overflow-auto"></div>
-        <div class="ml-6 w-64">
-            <div class="mb-4">
-                <label class="block text-sm font-semibold text-gray-700 mb-2">
-                    Année: <span id="yearValueCls" class="ml-2"></span>
-                </label>
-                <input type="range" id="yearSliderCls" class="w-full h-2 rounded-lg cursor-pointer">
-            </div>
-
-            <div class="mb-4">
-                <label for="continentSelectCls" class="block text-sm font-semibold text-gray-700 mb-2">
-                    Continent
-                </label>
-                <select id="continentSelectCls" class="w-full rounded-md border border-gray-300 p-2">
-                </select>
-            </div>
-
-            <div>
-                <label for="typeSelectCls" class="block text-sm font-semibold text-gray-700 mb-2">
-                    Type
-                </label>
-                <select id="typeSelectCls" class="w-full rounded-md border border-gray-300 p-2">
-                </select>
-            </div>
-        </div>
-    </div>
-    <h4 class="text-center font-bold mb-8 text-gray-800">
-      Répartition du contenu par classification d'age
-    </h4>
-  </div>
-
-  <div class="container mx-auto p-6">
-    <div class="grid grid-cols-5 gap-6">
-
-        <div class="col-span-4 space-y-6">
-            <div class="bg-white p-6">
-                <h2 class="text-lg font-semibold mb-4">Quantité de contenu par année</h2>
-                <div id="content-quantity-chart"></div>
-            </div>
-
-            <div class="bg-white p-6">
-                <h2 class="text-lg font-semibold mb-4">Durée des films par année (en minutes)</h2>
-                <div id="movie-duration-chart"></div>
-            </div>
-
-            <div class="bg-white p-6">
-                <h2 class="text-lg font-semibold mb-4">Nombre de saisons par année</h2>
-                <div id="tv-seasons-chart"></div>
-            </div>
-        </div>
-
-        <div class="col-span-1 space-y-6">
-            <div class="bg-white p-6 space-y-6">
-              <div class="mb-4">
-                <label for="audience-select" class="block text-sm font-semibold text-gray-700 mb-2">
-                  Audience
-                </label>
-                <select id="audience-select" class="w-full rounded-md border border-gray-300 p-2">
-                </select>
-              </div>
-
-              <div>
-                <label for="continent-select" class="block text-sm font-semibold text-gray-700 mb-2">
-                  Continent
-                </label>
-                <select id="continent-select" class="w-full rounded-md border border-gray-300 p-2">
-                </select>
-              </div>
-            </div>
-        </div>
-    </div>
-    </div>
-
-
 
   <footer class="bg-gradient-to-r from-red-500 to-blue-500 text-white py-4">
     <div class="container mx-auto text-center">
@@ -241,7 +128,6 @@
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
-  <script type="module" src="base.js"></script>
-  <script type="module" src="comparaison.js"></script>
+  <script type="module" src="dashboard.js"></script>
 </body>
 </html>

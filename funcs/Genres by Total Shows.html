@@ -90,9 +90,9 @@
                 .attr("class", "y-axis")
                 .call(d3.axisLeft(y).tickSize(0).tickPadding(10))
                 .selectAll("text")
-                .style("font-size", "12px") // Taille de texte ajustée
-                .style("font-family", "Arial") // Police définie
-                .attr("transform", "rotate(0)"); // Pas de rotation pour le texte
+                .style("font-size", "12px")
+                .style("font-family", "Arial")
+                .attr("transform", "rotate(0)");
 
             svg.append("g")
                 .attr("class", "x-axis")
