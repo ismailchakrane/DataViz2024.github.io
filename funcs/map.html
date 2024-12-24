@@ -24,12 +24,10 @@
   <body
     class="flex flex-col items-center justify-center min-h-screen text-gray-800"
   >
-    <!-- Titre Centré -->
     <h2 class="text-4xl font-bold mb-8 text-center" id="title">
       Total Shows By Country
     </h2>
 
-    <!-- Dropdown -->
     <div class="mb-4">
       <label for="platform" class="mr-2 font-medium"
         >Choisissez une plateforme :</label
@@ -42,7 +40,6 @@
       </select>
     </div>
 
-    <!-- Map Visualization -->
     <div
       id="map"
       class="w-full h-[500px] mb-4 flex items-center justify-center"
@@ -50,58 +47,38 @@
       <svg id="map-svg" class="block"></svg>
     </div>
 
-    <!-- Legend -->
     <div id="legend" class="flex justify-center items-center gap-4"></div>
 
     <script>
       const width = 960;
-      const height = 500;
+      const height = 800;
 
-      // Thèmes de couleurs pour chaque plateforme
       const themes = {
         "amazon_cleaned.csv": [
-          "#232F3E",
-          "#126C90",
-          "#098AB9",
-          "#0599CD",
-          "#00A8E1",
+          "#FFE0B2", "#FFB74D", "#FB8C00", "#F57C00", "#E65100",
         ],
         "disney_cleaned.csv": [
-          "#0C204F",
-          "#0F2E8F",
-          "#1035AF",
-          "#1139BF",
-          "#113CCF",
+          "#0288D1", "#1976D2", "#64B5F6", "#0D47A1", "#01579B",
         ],
         "hulu_cleaned.csv": [
-          "#101820",
-          "#168052",
-          "#19B46B",
-          "#1BCE77",
-          "#1CE783",
+          "#81C784", "#66BB6A", "#388E3C", "#2E7D32", "#1B5E20",
         ],
         "netflix_cleaned.csv": [
-          "#141414",
-          "#7D0F14",
-          "#B10C14",
-          "#CB0B14",
-          "#E50914",
+          "#E50914", "#F44336", "#D32F2F", "#C2185B", "#B71C1C",
         ],
       };
 
-      // Configuration du SVG avec un fond bleu pour les océans
+
       const svg = d3
         .select("#map-svg")
-        .style("background-color", "#E0F7FA") // Bleu clair pour l'océan
         .attr("width", "100%")
         .attr("height", "100%")
         .attr("viewBox", `0 0 ${width} ${height}`)
         .attr("preserveAspectRatio", "xMidYMid meet");
 
-      // Projection Mercator centrée
       const projection = d3
         .geoMercator()
-        .scale(140) // Ajuste la taille
+        .scale(140)
         .translate([width / 2, height / 1.5]);
 
       const path = d3.geoPath().projection(projection);
@@ -116,53 +93,62 @@
 
       const platformSelect = document.getElementById("platform");
 
-      // Fonction pour charger les données CSV et mettre à jour la carte
       function loadPlatformData(fileName) {
-        d3.selectAll("path").remove(); // Nettoyer la carte existante
+        d3.selectAll("path").remove();
         const colors = themes[fileName];
 
-        d3.csv("data/cleaned_datasets/" + fileName).then((data) => {
+        d3.csv(fileName).then((data) => {
           const countryCounts = new Map();
 
-          // Parcourir chaque ligne pour extraire et compter les pays
           data.forEach((row) => {
-            if (row.country) {
-              row.country
-                .split(",") // Sépare les pays par virgule
-                .map((d) => d.trim()) // Enlève les espaces autour des noms
-                .filter((d) => d && d !== "Bermuda") // Ignore Bermuda et les valeurs vides
-                .forEach((country) => {
-                  switch (country) {
-                    case "United States":
-                      country = "United States of America";
-                      break;
-                    case "West Germany":
-                    case "East Germany":
-                      country = "Germany";
-                      break;
-                    case "Soviet Union":
-                      country = "Russia";
-                      break;
-                    case "Vatican City":
-                      country = "Italy";
-                      break;
-                    case "Hong Kong":
-                      country = "China";
-                      break;
-                  }
-                  countryCounts.set(
-                    country,
-                    (countryCounts.get(country) || 0) + 1
-                  );
-                });
+            const { country, type } = row;
+            if (country && type) {
+              // Normalisation des noms de pays
+              let normalizedCountry = country.trim();
+              switch (normalizedCountry) {
+                case "United States":
+                  normalizedCountry = "United States of America";
+                  break;
+                case "West Germany":
+                case "East Germany":
+                  normalizedCountry = "Germany";
+                  break;
+                case "Soviet Union":
+                  normalizedCountry = "Russia";
+                  break;
+                case "Vatican City":
+                  normalizedCountry = "Italy";
+                  break;
+                case "Hong Kong":
+                  normalizedCountry = "China";
+                  break;
+              }
+
+              // Initialiser le pays dans le map s'il n'existe pas encore
+              if (!countryCounts.has(normalizedCountry)) {
+                countryCounts.set(normalizedCountry, { tvShows: 0, movies: 0, shows: 0 });
+              }
+
+              // Ajouter les films ou les émissions TV
+              if (type === "TV Show") {
+                countryCounts.get(normalizedCountry).tvShows += 1;
+              } else if (type === "Movie") {
+                countryCounts.get(normalizedCountry).movies += 1;
+              }
+
+              // Incrémenter le nombre total de shows
+              countryCounts.get(normalizedCountry).shows += 1;
             }
           });
 
-          const countryData = Array.from(countryCounts, ([country, shows]) => ({
+          const countryData = Array.from(countryCounts, ([country, counts]) => ({
             country,
-            shows,
+            shows: counts.shows,
+            tvShows: counts.tvShows,
+            movies: counts.movies,
           }));
 
+          // Échelle des couleurs avec une plus grande plage de contraste
           const colorScale = d3
             .scaleSequential()
             .domain([
@@ -189,9 +175,18 @@
                 const country = countryData.find(
                   (c) => c.country === d.properties.name
                 );
-                return country ? colorScale(country.shows) : "#ddd";
+                if (country) {
+                  return colorScale(country.shows);
+                } else {
+                  return "transparent"; // Pays non présent dans les données
+                }
               })
-              .attr("stroke", "#999")
+              .attr("stroke", (d) => {
+                const country = countryData.find(
+                  (c) => c.country === d.properties.name
+                );
+                return country ? "#999" : "#ccc"; // Contour plus léger pour les pays non présents
+              })
               .on("mouseover", (event, d) => {
                 const country = countryData.find(
                   (c) => c.country === d.properties.name
@@ -199,7 +194,7 @@
                 if (country) {
                   tooltip
                     .html(
-                      `<strong>Country:</strong> ${country.country}<br><strong>Shows:</strong> ${country.shows}`
+                      `<strong>${country.country}</strong><br><strong>Total Shows:</strong> ${country.shows}<br><strong>TV Shows:</strong> ${country.tvShows}<br><strong>Movies:</strong> ${country.movies}`
                     )
                     .style("left", event.pageX + 10 + "px")
                     .style("top", event.pageY + 10 + "px")
@@ -211,13 +206,14 @@
         });
       }
 
-      // Mise à jour de la carte lors de la sélection
       platformSelect.addEventListener("change", (e) => {
         loadPlatformData(e.target.value);
       });
 
-      // Chargement initial de la plateforme par défaut
       loadPlatformData("amazon_cleaned.csv");
     </script>
   </body>
 </html>
+  createRatingsChart(filteredData, palette);
+  createDonutChart(filteredData, palette, platform, totalTitles);
+  createReleaseChart(releaseData, palette);

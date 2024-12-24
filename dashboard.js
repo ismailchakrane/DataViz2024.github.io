@@ -139,6 +139,7 @@ function updateVisualisation(data, platform, palette, year, audience, continent)
   createRatingsChart(filteredData, palette);
   createDonutChart(filteredData, palette, platform, totalTitles);
   createReleaseChart(releaseData, palette);
+  createMap(filteredData, platform, palette);
 }
 
 function createGenresChart(filteredData, palette) {
@@ -267,7 +268,6 @@ function createRatingsChart(filteredData, palette) {
 }
 
 function createDonutChart(filteredData, palette, platform, totalTitles) {
-
   d3.select("#donut").selectAll("*").remove();
   const svgDonut = d3.select("#donut")
       .append("svg")
@@ -329,6 +329,7 @@ function createDonutChart(filteredData, palette, platform, totalTitles) {
 }
 
 function createReleaseChart(data, palette) {
+  d3.select("#release").selectAll("*").remove();
   const svg = d3.select("#release")
     .append("svg")
     .attr("width", 500)
@@ -455,5 +456,107 @@ function createReleaseChart(data, palette) {
     .attr("fill", (d, i) => i === 0 ? palette.primary : palette.secondary);
 }
 
+function createMap(data, platform, palette) {
+  d3.select("#map svg").remove();
 
+  const width = d3.select("#map").node().getBoundingClientRect().width;
+  const height = d3.select("#map").node().getBoundingClientRect().height;
 
+  const themes = {
+    'Amazon': ['#FFE0B2', '#FFB74D', '#FB8C00', '#F57C00', '#E65100'],
+    'Disney': ['#0288D1', '#1976D2', '#64B5F6', '#0D47A1', '#01579B'],
+    'Hulu': ['#81C784', '#66BB6A', '#388E3C', '#2E7D32', '#1B5E20'],
+    'Netflix': ['#E50914', '#F44336', '#D32F2F', '#C2185B', '#B71C1C']
+  };
+
+  const svg = d3.select("#map")
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+  const projection = d3.geoMercator()
+    .scale(140)
+    .translate([width / 2, height / 1.5]);
+
+  const path = d3.geoPath().projection(projection);
+
+  const tooltip = d3.select("body").append("div")
+    .attr("class", "tooltip hidden")
+    .style("position", "absolute")
+    .style("background", "#fff")
+    .style("border", "1px solid #000")
+    .style("padding", "5px")
+    .style("pointer-events", "none");
+
+  const colors = themes[platform];
+
+  const countryCounts = new Map();
+  data.forEach(d => {
+    let country = d.country.trim();
+    switch (country) {
+      case "United States":
+        country = "United States of America";
+        break;
+      case "West Germany":
+      case "East Germany":
+        country = "Germany";
+        break;
+      case "Soviet Union":
+        country = "Russia";
+        break;
+      case "Vatican City":
+        country = "Italy";
+        break;
+      case "Hong Kong":
+        country = "China";
+        break;
+    }
+
+    if (!countryCounts.has(country)) {
+      countryCounts.set(country, { tvShows: 0, movies: 0, shows: 0 });
+    }
+    if (d.type === "TV Show") {
+      countryCounts.get(country).tvShows += 1;
+    } else if (d.type === "Movie") {
+      countryCounts.get(country).movies += 1;
+    }
+    countryCounts.get(country).shows += 1;
+  });
+
+  const countryData = Array.from(countryCounts, ([country, counts]) => ({
+    country,
+    shows: counts.shows,
+    tvShows: counts.tvShows,
+    movies: counts.movies,
+  }));
+
+  const colorScale = d3.scaleSequential()
+    .domain([0, d3.max(countryData, d => d.shows)])
+    .interpolator(d3.interpolateRgbBasis(colors));
+
+  d3.json("custom.geo.json").then(worldData => {
+    svg.selectAll("path")
+      .data(worldData.features)
+      .enter().append("path")
+      .attr("d", path)
+      .attr("stroke", "white")
+      .attr("fill", d => {
+        const country = countryData.find(c => c.country === d.properties.name);
+        return country ? colorScale(country.shows) : palette.background;
+      })
+      .on("mouseover", function(event, d) {
+        const country = countryData.find(c => c.country === d.properties.name);
+        if (country) {
+          tooltip
+            .html(`<strong>${country.country}</strong><br><strong>Total Shows:</strong> ${country.shows}<br><strong>TV Shows:</strong> ${country.tvShows}<br><strong>Movies:</strong> ${country.movies}`)
+            .style("left", (event.pageX + 10) + "px")
+            .style("top", (event.pageY + 10) + "px")
+            .classed("hidden", false);
+        }
+      })
+      .on("mouseout", () => tooltip.classed("hidden", true));
+
+    d3.selectAll('path.border').style('display', 'none');
+
+  });
+}
