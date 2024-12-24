@@ -29,7 +29,7 @@
 </head>
 <body>
     <script>
-        const filePath = "amazon_cleaned.csv";
+        const filePath = "../streaming_data.csv";
         d3.csv(filePath).then(data => {
             const genreCounts = d3.rollups(
                 data,
