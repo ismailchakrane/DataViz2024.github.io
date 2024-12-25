@@ -345,9 +345,6 @@ function createDonutChart(filteredData, palette, platform, totalTitles) {
   arc.append("text")
     .attr("transform", d => `translate(${label.centroid(d)})`)
     .attr("dy", "0.35em")
-    .attr("text-anchor", "middle")
-    .html(d => `${d.data.key} <tspan x="0" dy="1em"> ${d.data.value}<tspan x="0" dy="1em">${Math.round((d.data.value / totalTitles) * 100)}%</tspan>`)
-    .style("font-size", "12px")
     .style("fill", palette.background);
 }
 
