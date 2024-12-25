@@ -267,8 +267,10 @@ function createRatingsChart(filteredData, palette) {
       .call(d3.axisLeft(yScaleRatings));
 }
 
+
 function createDonutChart(filteredData, palette, platform, totalTitles) {
   d3.select("#donut").selectAll("*").remove();
+  
   const svgDonut = d3.select("#donut")
       .append("svg")
       .attr("width", 500)
@@ -308,6 +310,17 @@ function createDonutChart(filteredData, palette, platform, totalTitles) {
       .outerRadius(radius - 40)
       .innerRadius(radius - 40);
 
+  // Create tooltip div
+  const tooltip = d3.select("body").append("div")
+      .attr("class", "tooltip")
+      .style("position", "absolute")
+      .style("background-color", "white")
+      .style("border", "1px solid #ccc")
+      .style("padding", "5px")
+      .style("border-radius", "5px")
+      .style("visibility", "hidden")
+      .style("font-size", "12px");
+
   const arc = g.selectAll(".arc")
       .data(pie(typesArray))
       .enter()
@@ -316,8 +329,18 @@ function createDonutChart(filteredData, palette, platform, totalTitles) {
 
   arc.append("path")
       .attr("d", path)
-      .attr("fill", d => color(d.data.key));
-
+      .attr("fill", d => color(d.data.key))
+      .on("mouseover", (event, d) => {
+          tooltip.style("visibility", "visible")
+              .html(`<strong>${d.data.key}</strong><br>Count: ${d.data.value}<br>Percentage: ${Math.round((d.data.value / totalTitles) * 100)}%`);
+      })
+      .on("mousemove", (event) => {
+          tooltip.style("top", (event.pageY + 10) + "px")
+              .style("left", (event.pageX + 10) + "px");
+      })
+      .on("mouseout", () => {
+          tooltip.style("visibility", "hidden");
+      });
 
   arc.append("text")
     .attr("transform", d => `translate(${label.centroid(d)})`)
@@ -327,6 +350,7 @@ function createDonutChart(filteredData, palette, platform, totalTitles) {
     .style("font-size", "12px")
     .style("fill", palette.background);
 }
+
 
 function createReleaseChart(data, palette) {
   d3.select("#release").selectAll("*").remove();
