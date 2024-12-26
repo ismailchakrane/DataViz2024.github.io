@@ -1,5 +1,6 @@
 import * as d3 from "https://cdn.skypack.dev/d3@7.6.1";
-    
+
+// Definition de la palette de couleurs pour chaque plateforme
 const colorPalettes = {
   Netflix: {
       background: "#141414",
@@ -24,6 +25,7 @@ const colorPalettes = {
 };
 
 d3.csv("streaming_data.csv").then(function(data) {
+
   data.forEach(d => {
       d.year_added = +d.year_added;
       d.duration_num = +d.duration_num;
@@ -33,10 +35,14 @@ d3.csv("streaming_data.csv").then(function(data) {
   const continents = ['All', ...new Set(data.map(d => d.continent))];
   const audiences = ['All', ...new Set(data.map(d => d.audience))];
   
+  // Initialisation des filtres
   setupFilters(years, continents, audiences);
+  // Utilisation de la palette de couleurs Netflix par défaut
   updatePlatform("Netflix");
+  // Initialisation de la visualisation avec Netflix
   updateVisualisation(data,"Netflix", colorPalettes["Netflix"], "2021", "All", "All");
 
+  // Gestion des événements pour la mise à jour des visualisations
   document.getElementById("platform-select").addEventListener("change", (e) => {
     const currentYear = document.getElementById("year-slider").value;
     const currentAudience = document.getElementById("audience-select-1").value;
@@ -64,13 +70,18 @@ d3.csv("streaming_data.csv").then(function(data) {
   });
 });
 
+// Fonction pour mettre à jour la palette de couleurs suivant la plateforme
 function updatePlatform(platform) {
+  // Récupération de la palette de couleurs correspondant à la plateforme
   const palette = colorPalettes[platform];
 
+  // Mise à jour des couleurs de fond et de texte
   d3.select("#visualisations").style("background", palette.background);
 
+  // Suppression des éléments existants
   d3.select("#platform").selectAll("*").remove();
 
+  // Création du texte pour la plateforme
   const svg = d3.select("#platform")
       .append("svg")
       .attr("width", 500)
@@ -87,30 +98,40 @@ function updatePlatform(platform) {
       .style("font-family", "Arial Black");
 }
 
-function setupFilters(years, continents, types, palette) {
+// Fonction pour initialiser les filtres
+function setupFilters(years, continents, audiences) {
+
+  // Initialisation du slider pour les années
   const yearSlider = document.getElementById('year-slider');
   yearSlider.min = Math.min(...years);
   yearSlider.max = Math.max(...years);
   yearSlider.value = yearSlider.max;
 
+  // Initialisation des listes déroulantes pour les continents et les audiences
   const continentSelect = document.getElementById('continent-select-1');
   continentSelect.innerHTML = continents.map(c => 
       `<option value="${c}">${c}</option>`).join('');
 
   const audienceSelect = document.getElementById('audience-select-1');
-  audienceSelect.innerHTML = types.map(t => 
+  audienceSelect.innerHTML = audiences.map(t => 
       `<option value="${t}">${t}</option>`).join('');
 }
 
+// Fonction pour mettre à jour les visualisations
 function updateVisualisation(data, platform, palette, year, audience, continent) {
+  // Filtrage des données suivant les critères sélectionnés
   let filteredData = data.filter(d => d.platform === platform && d.year_added === parseInt(year));
+  // Filtrage des données pour les graphiques de type "Release"
   let releaseData = data.filter(d => d.platform === platform);
+
+  // Mise à jour des données pour les visualisations
   const totalTitles = filteredData.length;
   const totalGenres = [...new Set(filteredData.map(d => d.genre))].length;
   const totalRatings = [...new Set(filteredData.map(d => d.rating))].length;
   const totalCountries = [...new Set(filteredData.map(d => d.country))].length;
   const yearSlider = document.getElementById('year-slider');
 
+  // Filtrage supplémentaire suivant les continents et audiences
   if (continent !== "All") {
     filteredData = filteredData.filter(d => d.continent === continent);
     releaseData = releaseData.filter(d => d.continent === continent);
@@ -120,6 +141,7 @@ function updateVisualisation(data, platform, palette, year, audience, continent)
     releaseData = releaseData.filter(d => d.audience === audience);
   }
 
+  // Mise à jour des valeurs affichées pour les métriques principales
   document.getElementById('yearValue1').textContent = yearSlider.value;
   document.getElementById('yearValue1').style.color = palette.primary;
 
@@ -135,14 +157,18 @@ function updateVisualisation(data, platform, palette, year, audience, continent)
   document.getElementById('genreValue1').textContent = totalGenres;
   document.getElementById('genreValue1').style.color = palette.primary;
 
+  // Création des visualisations
   createGenresChart(filteredData, palette);
   createRatingsChart(filteredData, palette);
-  createDonutChart(filteredData, palette, platform, totalTitles);
+  createDonutChart(filteredData, palette, totalTitles);
   createReleaseChart(releaseData, palette);
   createMap(filteredData, platform, palette);
 }
 
+// Fonction pour créer le graphique des genres
 function createGenresChart(filteredData, palette) {
+
+  // Création des données pour les genres
   const genresData = d3.rollup(
     filteredData,
     v => v.length,
@@ -151,7 +177,10 @@ function createGenresChart(filteredData, palette) {
 
   const genresArray = Array.from(genresData, ([key, value]) => ({ key, value }));
 
+  // Suppression des éléments existants
   d3.select("#genres").selectAll("*").remove();
+
+  // Création du graphique à barres pour les genres
   const svgGenres = d3.select("#genres")
       .append("svg")
       .attr("width", 600)
@@ -163,6 +192,7 @@ function createGenresChart(filteredData, palette) {
   const width = 500 - margin.left - margin.right;
   const height = 400 - margin.top - margin.bottom;
 
+  // Ajout des échelles pour les axes x et y
   const xScaleGenres = d3.scaleLinear()
       .domain([0, d3.max(genresArray, d => d.value)])
       .range([0, width]);
@@ -172,6 +202,7 @@ function createGenresChart(filteredData, palette) {
       .range([0, height])
       .padding(0.1);
 
+  // Création du graphique
   const chart = svgGenres.append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
@@ -204,8 +235,10 @@ function createGenresChart(filteredData, palette) {
       .call(d3.axisLeft(yScaleGenres));
 }
 
+// Fonction pour créer le graphique des ratings
 function createRatingsChart(filteredData, palette) {
 
+  // Création des données pour les ratings
   const ratingsData = d3.rollup(
     filteredData,
     v => v.length,
@@ -214,7 +247,10 @@ function createRatingsChart(filteredData, palette) {
 
   const ratingsArray = Array.from(ratingsData, ([key, value]) => ({ key, value }));
 
+  // Suppression des éléments existants
   d3.select("#ratings").selectAll("*").remove();
+
+  // Création du graphique à barres pour les ratings
   const svgRatings = d3.select("#ratings")
       .append("svg")
       .attr("width", 600)
@@ -226,6 +262,7 @@ function createRatingsChart(filteredData, palette) {
   const width = 500 - margin.left - margin.right;
   const height = 400 - margin.top - margin.bottom;
 
+  // Ajout des échelles pour les axes x et y
   const xScaleRatings = d3.scaleLinear()
       .domain([0, d3.max(ratingsArray, d => d.value)])
       .range([0, width]);
@@ -235,6 +272,7 @@ function createRatingsChart(filteredData, palette) {
       .range([0, height])
       .padding(0.1);
 
+  // Création du graphique
   const chart = svgRatings.append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
@@ -267,10 +305,21 @@ function createRatingsChart(filteredData, palette) {
       .call(d3.axisLeft(yScaleRatings));
 }
 
+// Fonction pour créer le graphique en donut
+function createDonutChart(filteredData, palette, totalTitles) {
 
-function createDonutChart(filteredData, palette, platform, totalTitles) {
+  // Création des données pour les types
+  const typesData = d3.rollup(
+    filteredData,
+    v => v.length,
+    d => d.type
+  );
+  const typesArray = Array.from(typesData, ([key, value]) => ({ key, value }));
+
+  // Suppression des éléments existants
   d3.select("#donut").selectAll("*").remove();
   
+  // Création du graphique en donut
   const svgDonut = d3.select("#donut")
       .append("svg")
       .attr("width", 500)
@@ -282,15 +331,9 @@ function createDonutChart(filteredData, palette, platform, totalTitles) {
   const width = 500 - margin.left - margin.right;
   const height = 400 - margin.top - margin.bottom;
 
-  const typesData = d3.rollup(
-      filteredData,
-      v => v.length,
-      d => d.type
-  );
-  const typesArray = Array.from(typesData, ([key, value]) => ({ key, value }));
-
   const radius = Math.min(width, height) / 2;
 
+  // Création du groupe pour le graphique
   const g = svgDonut.append("g")
       .attr("transform", `translate(${width / 2 + margin.left},${height / 2 + margin.top})`);
 
@@ -310,7 +353,7 @@ function createDonutChart(filteredData, palette, platform, totalTitles) {
       .outerRadius(radius - 40)
       .innerRadius(radius - 40);
 
-  // Create tooltip div
+  // Ajout des tooltips pour les arcs
   const tooltip = d3.select("body").append("div")
       .attr("class", "tooltip")
       .style("position", "absolute")
@@ -321,6 +364,7 @@ function createDonutChart(filteredData, palette, platform, totalTitles) {
       .style("visibility", "hidden")
       .style("font-size", "12px");
 
+  // Création des arcs pour les types
   const arc = g.selectAll(".arc")
       .data(pie(typesArray))
       .enter()
@@ -348,9 +392,19 @@ function createDonutChart(filteredData, palette, platform, totalTitles) {
     .style("fill", palette.background);
 }
 
-
+// Fonction pour créer le graphique de type "Release"
 function createReleaseChart(data, palette) {
+
+  // Création des données pour les années
+  const years = [...new Set(data.map(d => d.year_added))].sort();
+
+  const movieCounts = years.map(year => data.filter(d => d.type === 'Movie' && d.year_added === year).length);
+  const tvCounts = years.map(year => data.filter(d => d.type === 'TV Show' && d.year_added === year).length);
+
+  // Suppression des éléments existants
   d3.select("#release").selectAll("*").remove();
+
+  // Création du graphique pour les releases
   const svg = d3.select("#release")
     .append("svg")
     .attr("width", 500)
@@ -362,11 +416,6 @@ function createReleaseChart(data, palette) {
 
   const g = svg.append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
-
-  const years = [...new Set(data.map(d => d.year_added))].sort();
-
-  const movieCounts = years.map(year => data.filter(d => d.type === 'Movie' && d.year_added === year).length);
-  const tvCounts = years.map(year => data.filter(d => d.type === 'TV Show' && d.year_added === year).length);
 
   const x = d3.scaleLinear()
     .domain(d3.extent(years))
@@ -401,6 +450,7 @@ function createReleaseChart(data, palette) {
     .attr("stroke-width", 1.5)
     .attr("d", line);
 
+  // Ajout des points pour les releases avec des tooltips pour affichage de la valeur au survol pour les movies
   const dotsMovies = g.selectAll(".dotMovie")
     .data(movieCounts)
     .enter().append("g")
@@ -432,6 +482,7 @@ function createReleaseChart(data, palette) {
       d3.select(this.parentNode).select("text").remove();
     });
 
+  // Ajout des points pour les releases avec des tooltips pour affichage de la valeur au survol pour les TV Shows
   const dotsTV = g.selectAll(".dotTV")
     .data(tvCounts)
     .enter().append("g")
@@ -477,12 +528,16 @@ function createReleaseChart(data, palette) {
     .attr("fill", (d, i) => i === 0 ? palette.primary : palette.secondary);
 }
 
+// Fonction pour créer la carte
 function createMap(data, platform, palette) {
+
+  // Suppression des éléments existants
   d3.select("#map svg").remove();
 
   const width = d3.select("#map").node().getBoundingClientRect().width;
   const height = d3.select("#map").node().getBoundingClientRect().height;
 
+  // Définition des palettes de couleurs pour chaque plateforme
   const themes = {
     'Amazon': ['#FFE0B2', '#FFB74D', '#FB8C00', '#F57C00', '#E65100'],
     'Disney': ['#0288D1', '#1976D2', '#64B5F6', '#0D47A1', '#01579B'],
@@ -490,6 +545,7 @@ function createMap(data, platform, palette) {
     'Netflix': ['#E50914', '#F44336', '#D32F2F', '#C2185B', '#B71C1C']
   };
 
+  // Création de l'élément SVG pour la carte
   const svg = d3.select("#map")
     .append("svg")
     .attr("width", width)
@@ -511,6 +567,7 @@ function createMap(data, platform, palette) {
 
   const colors = themes[platform];
 
+  // Création des données pour les pays
   const countryCounts = new Map();
   data.forEach(d => {
     let country = d.country.trim();
@@ -555,6 +612,7 @@ function createMap(data, platform, palette) {
     .domain([0, d3.max(countryData, d => d.shows)])
     .interpolator(d3.interpolateRgbBasis(colors));
 
+  // Chargement des données pour la carte
   d3.json("custom.geo.json").then(worldData => {
     svg.selectAll("path")
       .data(worldData.features)
