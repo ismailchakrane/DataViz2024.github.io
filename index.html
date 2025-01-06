@@ -90,8 +90,11 @@
           </select>
         </div>
       </div>
+      <div id="data-message">
+
+      </div>
       <!-- Affichage des métriques principales -->
-      <div class="grid grid-cols-5 gap-4">
+      <div class="grid grid-cols-5 gap-4" id="dashboard-container">
         <div class="p-4">
           <h4 class="text-center font-bold mb-4 text-white">Total Titres</h4>
           <h4 class="text-3xl text-center font-bold" id="titlesValue1"></h4>
@@ -114,18 +117,18 @@
         </div>
       </div>
       <!-- Grille des graphiques -->
-      <div class="grid grid-cols-3 gap-4">
+      <div class="grid grid-cols-3 gap-4" id="visualisation-container-1">
         <div id="release" class="text-center p-4">Nombre de sorties par année</div>
         <div id="platform" class="p-4"></div>
         <div id="donut" class="text-center p-4">Répartition du contenu par type</div>
       </div>
-      <div class="grid grid-cols-2 gap-4">
+      <div class="grid grid-cols-2 gap-4" id="visualisation-container-2">
         <div id="genres" class="text-center p-4">Répartition du contenu par genre</div>
         <div id="ratings" class="text-center p-4">Répartition du contenu par classification</div>
       </div>
     </div>
      <!-- Carte géographique -->
-    <div class="grid grid-cols-1">
+    <div class="grid grid-cols-1" id="map-container">
       <div id="map" class="text-center p-4">Répartition géographique du contenu</div>
     </div>
   </div>
@@ -133,7 +136,7 @@
   <!-- Pied de page avec informations sur le projet -->
   <footer class="bg-gradient-to-r from-red-500 to-blue-500 text-white py-4">
     <div class="container mx-auto text-center">
-      <p>Projet réalisé dans le cadre du cours de Data Visualization dispensé par Aurélien Tarard à l’Université Claude Bernard Lyon</p>
+      <p>Projet réalisé dans le cadre du cours de Data Visualization dispensé par Aurélien Tarard à l’Université Claude Bernard Lyon 1</p>
       <p class="mt-2">Copyright &copy; 2024</p>
     </div>
   </footer>

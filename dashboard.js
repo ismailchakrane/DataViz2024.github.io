@@ -117,53 +117,92 @@ function setupFilters(years, continents, audiences) {
       `<option value="${t}">${t}</option>`).join('');
 }
 
-// Fonction pour mettre à jour les visualisations
+// Function to update visualizations
 function updateVisualisation(data, platform, palette, year, audience, continent) {
-  // Filtrage des données suivant les critères sélectionnés
-  let filteredData = data.filter(d => d.platform === platform && d.year_added === parseInt(year));
-  // Filtrage des données pour les graphiques de type "Release"
-  let releaseData = data.filter(d => d.platform === platform);
+  // Filter data based on selected criteria
+  let filteredData = data.filter(d => 
+    d.platform === platform && 
+    d.year_added === parseInt(year) && 
+    (continent === "All" || d.continent === continent) && 
+    (audience === "All" || d.audience === audience)
+  );
 
-  // Mise à jour des données pour les visualisations
+  let releaseData = data.filter(d => 
+    d.platform === platform && 
+    (continent === "All" || d.continent === continent) && 
+    (audience === "All" || d.audience === audience)
+  );
+
+  if (filteredData.length === 0) {
+    // Clear visualizations
+    const elementsToClear = ["#genres", "#ratings", "#donut", "#release", "#map svg"];
+    elementsToClear.forEach(selector => d3.select(selector).selectAll("*").remove());
+
+    // Hide containers (remove them from layout)
+    ['dashboard-container', 'visualisation-container-1', 'visualisation-container-2', 'map-container'].forEach(id => {
+      const element = document.getElementById(id);
+      if (element) element.style.display = 'none';
+    });
+
+    // Show no-data message
+    const messageElement = document.getElementById('data-message');
+    if (messageElement) {
+      messageElement.style.display = 'grid';
+      messageElement.innerHTML = 
+        `<div style="padding: 20px; border: 1px solid #ccc; text-align: center; color: ${palette.primary}">
+          Aucune donnée disponible
+        </div>`;
+    }
+    return;
+  } else {
+    // Hide no-data message
+    const messageElement = document.getElementById('data-message');
+    if (messageElement) {
+      messageElement.style.display = 'none';
+    }
+
+    // Show containers (restore layout space)
+    ['dashboard-container', 'visualisation-container-1', 'visualisation-container-2', 'map-container'].forEach(id => {
+      const element = document.getElementById(id);
+      if (element) element.style.display = 'grid';
+    });
+  }
+
+  // Update metrics based on filtered data
   const totalTitles = filteredData.length;
-  const totalGenres = [...new Set(filteredData.map(d => d.genre))].length;
-  const totalRatings = [...new Set(filteredData.map(d => d.rating))].length;
-  const totalCountries = [...new Set(filteredData.map(d => d.country))].length;
+  const totalGenres = new Set(filteredData.map(d => d.genre)).size;
+  const totalRatings = new Set(filteredData.map(d => d.rating)).size;
+  const totalCountries = new Set(filteredData.map(d => d.country)).size;
+
   const yearSlider = document.getElementById('year-slider');
-
-  // Filtrage supplémentaire suivant les continents et audiences
-  if (continent !== "All") {
-    filteredData = filteredData.filter(d => d.continent === continent);
-    releaseData = releaseData.filter(d => d.continent === continent);
-  }
-  if (audience !== "All") {
-    filteredData = filteredData.filter(d => d.audience === audience);
-    releaseData = releaseData.filter(d => d.audience === audience);
+  if (yearSlider) {
+    document.getElementById('yearValue1').textContent = yearSlider.value;
+    document.getElementById('yearValue1').style.color = palette.primary;
   }
 
-  // Mise à jour des valeurs affichées pour les métriques principales
-  document.getElementById('yearValue1').textContent = yearSlider.value;
-  document.getElementById('yearValue1').style.color = palette.primary;
+  const metrics = [
+    { id: 'titlesValue1', value: totalTitles },
+    { id: 'countryValue1', value: totalCountries },
+    { id: 'ratingsValue1', value: totalRatings },
+    { id: 'genreValue1', value: totalGenres }
+  ];
 
-  document.getElementById('titlesValue1').textContent = totalTitles;
-  document.getElementById('titlesValue1').style.color = palette.primary;
+  metrics.forEach(metric => {
+    const element = document.getElementById(metric.id);
+    if (element) {
+      element.textContent = metric.value;
+      element.style.color = palette.primary;
+    }
+  });
 
-  document.getElementById('countryValue1').textContent = totalCountries;
-  document.getElementById('countryValue1').style.color = palette.primary;
-
-  document.getElementById('ratingsValue1').textContent = totalRatings;
-  document.getElementById('ratingsValue1').style.color = palette.primary;
-
-  document.getElementById('genreValue1').textContent = totalGenres;
-  document.getElementById('genreValue1').style.color = palette.primary;
-
-  // Création des visualisations
+  // Create visualizations
   createGenresChart(filteredData, palette);
   createRatingsChart(filteredData, palette);
   createDonutChart(filteredData, palette, totalTitles);
   createReleaseChart(releaseData, palette);
   createMap(filteredData, platform, palette);
 }
+
 
 // Fonction pour créer le graphique des genres
 function createGenresChart(filteredData, palette) {
