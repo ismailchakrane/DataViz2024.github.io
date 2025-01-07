@@ -47,11 +47,11 @@ d3.csv('streaming_data.csv').then(function(data) {
   const continents = ['All', ...new Set(data.map(d => d.continent))];
   const types = ['All', ...new Set(data.map(d => d.type))];
 
-  // Initialize filters
+  // Initalisation des filtres
   setupFilters(years, continents, types, "Genre");
   setupFilters(years, continents, types, "Cls");
 
-  // Initialize visualizations
+  // Initialisation des visus
   updateVisualization(data, 'genre', svgGenre);
   updateVisualization(data, 'rating', svgCls);
 
@@ -65,7 +65,7 @@ d3.csv('streaming_data.csv').then(function(data) {
   document.getElementById('typeSelectCls').addEventListener('change', () => updateVisualization(data, 'rating', svgCls));
 
   document.getElementById('voirToutBtnCls').addEventListener('click', () => toggleVoirTout(data, 'rating', svgCls));
-  document.getElementById('voirToutBtnGenre').addEventListener('click', () => toggleVoirTout(data, 'genre', svgCls));
+  document.getElementById('voirToutBtnGenre').addEventListener('click', () => toggleVoirTout(data, 'genre', svgGenre));
 });
 
 function setupFilters(years, continents, types, info) {
@@ -86,11 +86,15 @@ function setupFilters(years, continents, types, info) {
 
 function updateVisualization(data, type, svg) {
   const prefix = type === 'genre' ? 'Genre' : 'Cls';
-  const yearValue = document.getElementById(`yearSlider${prefix}`).value;
+  const yearSlider = document.getElementById(`yearSlider${prefix}`);
   const continentValue = document.getElementById(`continentSelect${prefix}`).value;
   const typeValue = document.getElementById(`typeSelect${prefix}`).value;
-  document.getElementById(`yearValue${prefix}`).textContent = yearValue;
-
+  let yearValue = undefined;
+  if (!yearSlider.disabled) {
+    yearValue = yearSlider.value
+    document.getElementById(`yearValue${prefix}`).textContent = yearValue;
+  }
+  
   let filtered = null;
 
   if (prefix == 'Cls' && isYearFilterEnabledCls) {
@@ -233,35 +237,34 @@ function updateVisualization(data, type, svg) {
   }
 }
 
+// Fonction pour le filtrage par année ou non
 function toggleVoirTout(data, type, svg) {
   if (type === 'genre') {
     isYearFilterEnabledGenre = !isYearFilterEnabledGenre;
     const yearSlider = document.getElementById('yearSliderGenre');
-    const yearLabel = document.getElementById('yearValueGenre');
     if (isYearFilterEnabledGenre) {
       yearSlider.disabled = false;
-      yearLabel.textContent = yearSlider.value;
+      document.getElementById('yearValueGenre').textContent = yearSlider.value;
       document.getElementById('voirToutBtnGenre').textContent = 'Voir tout';
     } else {
       yearSlider.disabled = true;
-      yearLabel.textContent = 'Tous les ans';
-      document.getElementById('voirToutBtnGenre').textContent = 'Filtrer par année';
+      document.getElementById('yearValueGenre').textContent = "Tous les ans";
+      document.getElementById('voirToutBtnGenre').textContent = "Filtrer par année";
     }
-    updateVisualization(data, 'genre', svgGenre);
+    updateVisualization(data, 'genre', svg);
   } else if (type === 'rating') {
     isYearFilterEnabledCls = !isYearFilterEnabledCls;
     const yearSlider = document.getElementById('yearSliderCls');
-    const yearLabel = document.getElementById('yearValueCls');
     if (isYearFilterEnabledCls) {
       yearSlider.disabled = false;
-      yearLabel.textContent = yearSlider.value;
+      document.getElementById('yearValueCls').textContent = yearSlider.value;
       document.getElementById('voirToutBtnCls').textContent = 'Voir tout';
     } else {
       yearSlider.disabled = true;
-      yearLabel.textContent = 'Tous les ans';
-      document.getElementById('voirToutBtnCls').textContent = 'Filtrer par année';
+      document.getElementById('yearValueCls').textContent = "Tous les ans";
+      document.getElementById('voirToutBtnCls').textContent = "Filtrer par année";
     }
-    updateVisualization(data, 'rating', svgCls);
+    updateVisualization(data, 'rating', svg);
   }
 }
 // -----------------------------------------------

@@ -24,6 +24,11 @@ const colorPalettes = {
   },
 };
 
+let year = "2021"
+let audience = "All"
+let continent = "All"
+let isYearFilterEnabled = true;
+
 d3.csv("streaming_data.csv").then(function(data) {
 
   data.forEach(d => {
@@ -32,41 +37,28 @@ d3.csv("streaming_data.csv").then(function(data) {
   });
 
   const years = [...new Set(data.map(d => d.year_added))].sort();
-  const continents = ['All', ...new Set(data.map(d => d.continent))];
-  const audiences = ['All', ...new Set(data.map(d => d.audience))];
   
   // Initialisation des filtres
-  setupFilters(years, continents, audiences);
+  setupFilters(years);
   // Utilisation de la palette de couleurs Netflix par défaut
   updatePlatform("Netflix");
   // Initialisation de la visualisation avec Netflix
-  updateVisualisation(data,"Netflix", colorPalettes["Netflix"], "2021", "All", "All");
+  updateVisualisation(data,"Netflix", colorPalettes["Netflix"], year, audience, continent);
 
   // Gestion des événements pour la mise à jour des visualisations
   document.getElementById("platform-select").addEventListener("change", (e) => {
     const currentYear = document.getElementById("year-slider").value;
-    const currentAudience = document.getElementById("audience-select-1").value;
-    const currentContinent = document.getElementById("continent-select-1").value;
     updatePlatform(e.target.value);
-    updateVisualisation(data, e.target.value, colorPalettes[e.target.value], currentYear, currentAudience, currentContinent);
-  });
-  document.getElementById("continent-select-1").addEventListener("change", (e) => {
-    const currentYear = document.getElementById("year-slider").value;
-    const currentAudience = document.getElementById("audience-select-1").value;
-    const currentPlatform = document.getElementById("platform-select").value;
-    updateVisualisation(data, currentPlatform, colorPalettes[currentPlatform], currentYear, currentAudience, e.target.value);
-  });
-  document.getElementById("audience-select-1").addEventListener("change", (e) => {
-    const currentYear = document.getElementById("year-slider").value;
-    const currentContinent = document.getElementById("continent-select-1").value;
-    const currentPlatform = document.getElementById("platform-select").value;
-    updateVisualisation(data, currentPlatform, colorPalettes[currentPlatform], currentYear, e.target.value, currentContinent);
+    updateVisualisation(data, e.target.value, colorPalettes[e.target.value], currentYear, audience, continent);
   });
   document.getElementById("year-slider").addEventListener("input", (e) => {
     const currentPlatform = document.getElementById("platform-select").value;
-    const currentAudience = document.getElementById("audience-select-1").value;
-    const currentContinent = document.getElementById("continent-select-1").value;
-    updateVisualisation(data, currentPlatform, colorPalettes[currentPlatform], e.target.value, currentAudience, currentContinent);
+    updateVisualisation(data, currentPlatform, colorPalettes[currentPlatform], e.target.value, audience, continent);
+  });
+  document.getElementById('voirToutBtn').addEventListener('click', () => {
+    const currentPlatform = document.getElementById("platform-select").value;
+    const currentYear = document.getElementById("year-slider").value;
+    toggleVoirTout(data, currentPlatform, colorPalettes[currentPlatform], currentYear, audience, continent)
   });
 });
 
@@ -99,33 +91,19 @@ function updatePlatform(platform) {
 }
 
 // Fonction pour initialiser les filtres
-function setupFilters(years, continents, audiences) {
+function setupFilters(years) {
 
   // Initialisation du slider pour les années
   const yearSlider = document.getElementById('year-slider');
   yearSlider.min = Math.min(...years);
   yearSlider.max = Math.max(...years);
   yearSlider.value = yearSlider.max;
-
-  // Initialisation des listes déroulantes pour les continents et les audiences
-  const continentSelect = document.getElementById('continent-select-1');
-  continentSelect.innerHTML = continents.map(c => 
-      `<option value="${c}">${c}</option>`).join('');
-
-  const audienceSelect = document.getElementById('audience-select-1');
-  audienceSelect.innerHTML = audiences.map(t => 
-      `<option value="${t}">${t}</option>`).join('');
 }
 
 // Function to update visualizations
 function updateVisualisation(data, platform, palette, year, audience, continent) {
   // Filter data based on selected criteria
-  let filteredData = data.filter(d => 
-    d.platform === platform && 
-    d.year_added === parseInt(year) && 
-    (continent === "All" || d.continent === continent) && 
-    (audience === "All" || d.audience === audience)
-  );
+  let filteredData = undefined
 
   let releaseData = data.filter(d => 
     d.platform === platform && 
@@ -133,13 +111,33 @@ function updateVisualisation(data, platform, palette, year, audience, continent)
     (audience === "All" || d.audience === audience)
   );
 
+  const yearSlider = document.getElementById('year-slider');
+  if (!yearSlider.disabled) {
+    document.getElementById('yearValue1').textContent = yearSlider.value;
+    document.getElementById('yearValue1').style.color = palette.primary;
+    filteredData = data.filter(d => 
+      d.platform === platform && 
+      d.year_added === parseInt(year) && 
+      (continent === "All" || d.continent === continent) && 
+      (audience === "All" || d.audience === audience)
+    );
+  } else {
+    document.getElementById('yearValue1').textContent = "Tous les ans";
+    document.getElementById('yearValue1').style.color = palette.primary;
+    filteredData = data.filter(d => 
+      d.platform === platform && 
+      (continent === "All" || d.continent === continent) && 
+      (audience === "All" || d.audience === audience)
+    );
+  }
+
   if (filteredData.length === 0) {
     // Clear visualizations
     const elementsToClear = ["#genres", "#ratings", "#donut", "#release", "#map svg"];
     elementsToClear.forEach(selector => d3.select(selector).selectAll("*").remove());
 
     // Hide containers (remove them from layout)
-    ['dashboard-container', 'visualisation-container-1', 'visualisation-container-2', 'map-container'].forEach(id => {
+    ['dashboard-container', 'visualisation-container-1', 'visualisation-container-2', 'visualisation-container-3', 'map-container'].forEach(id => {
       const element = document.getElementById(id);
       if (element) element.style.display = 'none';
     });
@@ -162,7 +160,7 @@ function updateVisualisation(data, platform, palette, year, audience, continent)
     }
 
     // Show containers (restore layout space)
-    ['dashboard-container', 'visualisation-container-1', 'visualisation-container-2', 'map-container'].forEach(id => {
+    ['dashboard-container', 'visualisation-container-1', 'visualisation-container-2', 'visualisation-container-3', 'map-container'].forEach(id => {
       const element = document.getElementById(id);
       if (element) element.style.display = 'grid';
     });
@@ -173,12 +171,6 @@ function updateVisualisation(data, platform, palette, year, audience, continent)
   const totalGenres = new Set(filteredData.map(d => d.genre)).size;
   const totalRatings = new Set(filteredData.map(d => d.rating)).size;
   const totalCountries = new Set(filteredData.map(d => d.country)).size;
-
-  const yearSlider = document.getElementById('year-slider');
-  if (yearSlider) {
-    document.getElementById('yearValue1').textContent = yearSlider.value;
-    document.getElementById('yearValue1').style.color = palette.primary;
-  }
 
   const metrics = [
     { id: 'titlesValue1', value: totalTitles },
@@ -201,6 +193,8 @@ function updateVisualisation(data, platform, palette, year, audience, continent)
   createDonutChart(filteredData, palette, totalTitles);
   createReleaseChart(releaseData, palette);
   createMap(filteredData, platform, palette);
+  createContinentChart(filteredData, palette, data);
+  createAudienceChart(filteredData, palette, data);
 }
 
 
@@ -677,4 +671,170 @@ function createMap(data, platform, palette) {
     d3.selectAll('path.border').style('display', 'none');
 
   });
+}
+
+// Fonction pour créer le graphique des audiences
+function createAudienceChart(filteredData, palette, data) {
+  const audienceData = d3.rollup(
+    filteredData,
+    v => v.length,
+    d => d.audience
+  );
+
+  const audienceArray = Array.from(audienceData, ([key, value]) => ({ key, value }));
+
+  d3.select("#audience").selectAll("*").remove();
+
+  const svgAudience = d3.select("#audience")
+      .append("svg")
+      .attr("width", 500)
+      .attr("height", 400);
+
+  const margin = {top: 40, right: 20, bottom: 40, left: 100};
+  const width = 500 - margin.left - margin.right;
+  const height = 400 - margin.top - margin.bottom;
+
+  const xScale = d3.scaleBand()
+      .domain(audienceArray.map(d => d.key))
+      .range([0, width])
+      .padding(0.1);
+
+  const yScale = d3.scaleLinear()
+      .domain([0, d3.max(audienceArray, d => d.value)])
+      .range([height, 0]);
+
+  const chart = svgAudience.append("g")
+      .attr("transform", `translate(${margin.left},${margin.top})`);
+
+  chart.selectAll("rect")
+      .data(audienceArray)
+      .enter()
+      .append("rect")
+      .attr("x", d => xScale(d.key))
+      .attr("y", d => yScale(d.value))
+      .attr("width", xScale.bandwidth())
+      .attr("height", d => height - yScale(d.value))
+      .attr("fill", palette.primary)
+      .style("cursor", "pointer")
+      .on("mouseover", function() {
+        d3.select(this)
+          .transition()
+          .duration(200)
+          .attr("fill", d3.color(palette.primary).brighter(0.5));
+      })
+      .on("mouseout", function() {
+        d3.select(this)
+          .transition()
+          .duration(200)
+          .attr("fill", palette.primary);
+      })
+      .on("click", function(event, d) {
+        audience = audience === d.key ? "All" : d.key;
+        const currentPlatform = document.getElementById("platform-select").value;
+        const currentYear = document.getElementById("year-slider").value;
+        updateVisualisation(data, currentPlatform, colorPalettes[currentPlatform], currentYear, audience, continent);
+      });
+
+  chart.selectAll("text")
+      .data(audienceArray)
+      .enter()
+      .append("text")
+      .attr("x", d => xScale(d.key) + xScale.bandwidth() / 2)
+      .attr("y", d => yScale(d.value) - 5)
+      .attr("text-anchor", "middle")
+      .attr("fill", palette.secondary)
+      .text(d => d.value);
+
+  chart.append("g").attr("transform", `translate(0, ${height})`).call(d3.axisBottom(xScale));
+  chart.append("g").call(d3.axisLeft(yScale));
+}
+
+// Fonction pour créer le graphique des continents
+function createContinentChart(filteredData, palette, data) {
+  const continentData = d3.rollup(
+    filteredData,
+    v => v.length,
+    d => d.continent
+  );
+
+  const continentArray = Array.from(continentData, ([key, value]) => ({ key, value }));
+
+  d3.select("#continent").selectAll("*").remove();
+
+  const svgContinent = d3.select("#continent")
+      .append("svg")
+      .attr("width", 500)
+      .attr("height", 400);
+
+  const margin = {top: 40, right: 20, bottom: 40, left: 100};
+  const width = 500 - margin.left - margin.right;
+  const height = 400 - margin.top - margin.bottom;
+
+  const xScale = d3.scaleBand()
+      .domain(continentArray.map(d => d.key))
+      .range([0, width])
+      .padding(0.1);
+
+  const yScale = d3.scaleLinear()
+      .domain([0, d3.max(continentArray, d => d.value)])
+      .range([height, 0]);
+
+  const chart = svgContinent.append("g")
+      .attr("transform", `translate(${margin.left},${margin.top})`);
+
+  chart.selectAll("rect")
+      .data(continentArray)
+      .enter()
+      .append("rect")
+      .attr("x", d => xScale(d.key))
+      .attr("y", d => yScale(d.value))
+      .attr("width", xScale.bandwidth())
+      .attr("height", d => height - yScale(d.value))
+      .attr("fill", palette.primary)
+      .style("cursor", "pointer")
+      .on("mouseover", function() {
+        d3.select(this)
+          .transition()
+          .duration(200)
+          .attr("fill", d3.color(palette.primary).brighter(0.5));
+      })
+      .on("mouseout", function() {
+        d3.select(this)
+          .transition()
+          .duration(200)
+          .attr("fill", palette.primary);
+      })
+      .on("click", function(event, d) {
+        continent = continent === d.key ? "All" : d.key;
+        const currentPlatform = document.getElementById("platform-select").value;
+        const currentYear = document.getElementById("year-slider").value;
+        updateVisualisation(data, currentPlatform, colorPalettes[currentPlatform], currentYear, audience, continent);
+      });
+
+  chart.selectAll("text")
+      .data(continentArray)
+      .enter()
+      .append("text")
+      .attr("x", d => xScale(d.key) + xScale.bandwidth() / 2)
+      .attr("y", d => yScale(d.value) - 5)
+      .attr("text-anchor", "middle")
+      .attr("fill", palette.secondary)
+      .text(d => d.value);
+
+  chart.append("g").attr("transform", `translate(0, ${height})`).call(d3.axisBottom(xScale));
+  chart.append("g").call(d3.axisLeft(yScale));
+}
+
+// Fonction pour bloquer le filtrage par année ou non
+function toggleVoirTout(data, platform, palette, year, audience, continent) {
+  isYearFilterEnabled = !isYearFilterEnabled;
+  const yearSlider = document.getElementById('year-slider');
+  if (isYearFilterEnabled) {
+    yearSlider.disabled = false;
+    document.getElementById('voirToutBtn').textContent = 'Voir tout';
+  } else {
+    yearSlider.disabled = true;
+    document.getElementById('voirToutBtn').textContent = 'Filtrer par année';
+  }
+  updateVisualisation(data, platform, palette, year, audience, continent);
 }
