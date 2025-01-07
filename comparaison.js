@@ -1,276 +1,272 @@
 import * as d3 from "https://cdn.skypack.dev/d3@7.6.1";
 
-// -----------------------------------------------
-// Treemap Genre and Age Visualization
-// -----------------------------------------------
-const width = 1260;
-const height = 460;
-const margin = { top: 20, right: 10, bottom: 20, left: 10 };
-
-// Creation des éléments svg pour les visualisations
-const svgGenre = d3.select('#visualizationGenre')
-  .append('svg')
-  .attr('width', width)
-  .attr('height', height);
-
-const treemapGenre = d3.treemap()
-  .size([width - margin.left - margin.right, height - margin.top - margin.bottom])
-  .padding(2);
-
-const svgCls= d3.select('#visualizationCls')
-  .append('svg')
-  .attr('width', width)
-  .attr('height', height);
-
-const treemapCls = d3.treemap()
-  .size([width - margin.left - margin.right, height - margin.top - margin.bottom])
-  .padding(2);
-
-// Création de l'échelle de couleur
-const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
-
-d3.csv('streaming_data.csv').then(function(data) {
-    data.forEach(d => {
-        d.year_added = +d.year_added;
-        d.duration_num = +d.duration_num;
-    });
-
-    const years = [...new Set(data.map(d => d.year_added))].sort();
-    const continents = ['All', ...new Set(data.map(d => d.continent))];
-    const types = ['All', ...new Set(data.map(d => d.type))];
-
-    // Initialisation des filtres
-    setupFilters(years, continents, types, "Genre");
-    setupFilters(years, continents, types, "Cls");
-    // Initialisation des visualisations
-    updateVisualizationGenre(data);
-    updateVisualizationCls(data);
-
-    // Gestion des événements pour la mise à jour des visualisations
-    document.getElementById('yearSliderGenre').addEventListener('input', () => updateVisualizationGenre(data));
-    document.getElementById('continentSelectGenre').addEventListener('change', () => updateVisualizationGenre(data));
-    document.getElementById('typeSelectGenre').addEventListener('change', () => updateVisualizationGenre(data));
-
-    document.getElementById('yearSliderCls').addEventListener('input', () => updateVisualizationCls(data));
-    document.getElementById('continentSelectCls').addEventListener('change', () => updateVisualizationCls(data));
-    document.getElementById('typeSelectCls').addEventListener('change', () => updateVisualizationCls(data));
-});
-
-// Fonction pour initialiser les filtres
-function setupFilters(years, continents, types, info) {
-    // Initialisation du slider pour les années
-    const yearSlider = document.getElementById('yearSlider'+info);
-    yearSlider.min = Math.min(...years);
-    yearSlider.max = Math.max(...years);
-    yearSlider.value = yearSlider.max;
-    document.getElementById('yearValue'+info).textContent = yearSlider.value;
-
-    // Initialisation des listes déroulantes pour les continents et les types
-    const continentSelect = document.getElementById('continentSelect'+info);
-    continentSelect.innerHTML = continents.map(c => 
-        `<option value="${c}">${c}</option>`).join('');
-
-    const typeSelect = document.getElementById('typeSelect'+info);
-    typeSelect.innerHTML = types.map(t => 
-        `<option value="${t}">${t}</option>`).join('');
-}
-
-// Fonction pour la mise à jour de la visualisation treemap du genre
-function updateVisualizationGenre(data) {
-    // Récupération des valeurs des filtres
-    const yearValue = document.getElementById('yearSliderGenre').value;
-    const continentValue = document.getElementById('continentSelectGenre').value;
-    const typeValue = document.getElementById('typeSelectGenre').value;
-    document.getElementById('yearValueGenre').textContent = yearValue;
-
-    // Filtrage des données
-    const filtered = data.filter(d => {
-        return d.year_added == yearValue &&
-            (continentValue === 'All' || d.continent === continentValue) &&
-            (typeValue === 'All' || d.type === typeValue);
-    });
-
-    // Création des groupes de genres
-    const genreGroups = d3.group(filtered, d => d.genre);
-    let hierarchyData = {
-        children: Array.from(genreGroups, ([genre, items]) => ({
-            genre,
-            value: items.length,
-            items
-        }))
-    };
-
-    // Tri des groupes par valeur et sélection des 25 premiers
-    hierarchyData.children.sort((a, b) => b.value - a.value);
-    hierarchyData.children = hierarchyData.children.slice(0, 25);
-
-    const root = d3.hierarchy(hierarchyData)
-        .sum(d => d.value);
-
-    // Mise à jour du treemap
-    treemapGenre(root);
-
-    const nodes = svgGenre.selectAll('g')
-        .data(root.leaves(), d => d.data.genre);
-
-    nodes.exit().remove();
-
-    const nodesEnter = nodes.enter()
-        .append('g');
-
-    nodesEnter.append('rect');
-    nodesEnter.append('text');
-
-    // Animation pour la transition des groupes
-    const nodesUpdate = nodes.merge(nodesEnter)
-        .transition()
-        .duration(750)
-        .attr('transform', d => `translate(${d.x0},${d.y0})`);
-
-    // Mise à jour des rectangles et du texte
-    nodesUpdate.select('rect')
-        .attr('width', d => d.x1 - d.x0)
-        .attr('height', d => d.y1 - d.y0)
-        .style('fill', d => colorScale(d.data.genre));
-    
-    nodesUpdate.select('text')
-        .attr('x', 5)
-        .attr('y', 20)
-        .text(d => `${d.data.genre} (${d.data.value})`)
-        .attr('class', 'text-wrap')
-        .style('font-size', '6px')
-        .style('fill', 'white');
-
-    // Gestion des événements pour l'affichage du tooltip
-    const allNodes = svgGenre.selectAll('g');
-
-    allNodes.selectAll('rect')
-        .on('mouseover', showTooltipGenre)
-        .on('mouseout', hideTooltip);
-}
-
-// Fonction pour la mise à jour de la visualisation treemap de la classification d'âge
-function updateVisualizationCls(data) {
-    // Récupération des valeurs des filtres
-    const yearValue = document.getElementById('yearSliderCls').value;
-    const continentValue = document.getElementById('continentSelectCls').value;
-    const typeValue = document.getElementById('typeSelectCls').value;
-    document.getElementById('yearValueCls').textContent = yearValue;
-
-    // Filtrage des données
-    const filtered = data.filter(d => {
-        return d.year_added == yearValue &&
-            (continentValue === 'All' || d.continent === continentValue) &&
-            (typeValue === 'All' || d.type === typeValue);
-    });
-
-    const ratingGroups = d3.group(filtered, d => d.rating);
-
-    // Création des groupes de classification d'âge
-    let hierarchyData = {
-        children: Array.from(ratingGroups, ([rating, items]) => ({
-            rating,
-            value: items.length,
-            items
-        }))
-    };
-
-    // Tri des groupes par valeur et sélection des 15 premiers
-    hierarchyData.children.sort((a, b) => b.value - a.value);
-    hierarchyData.children = hierarchyData.children.slice(0, 14);
-
-    const root = d3.hierarchy(hierarchyData)
-        .sum(d => d.value);
-
-    // Mise à jour du treemap
-    treemapCls(root);
-
-    const nodes = svgCls.selectAll('g')
-        .data(root.leaves(), d => d.data.rating);
-
-    nodes.exit().remove();
-
-    const nodesEnter = nodes.enter()
-        .append('g');
-
-    nodesEnter.append('rect');
-    nodesEnter.append('text');
-
-    // Animation pour la transition des groupes
-    const nodesUpdate = nodes.merge(nodesEnter)
-        .transition()
-        .duration(750)
-        .attr('transform', d => `translate(${d.x0},${d.y0})`);
-
-    // Mise à jour des rectangles et du texte
-    nodesUpdate.select('rect')
-        .attr('width', d => d.x1 - d.x0)
-        .attr('height', d => d.y1 - d.y0)
-        .style('fill', d => colorScale(d.data.rating));
-  
-    nodesUpdate.select('text')
-        .attr('x', 5)
-        .attr('y', 20)
-        .text(d => `${d.data.rating} (${d.data.value})`)
-        .attr('class', 'text-wrap')
-        .style('font-size', '6px')
-        .style('fill', 'white');
-
-    // Gestion des événements pour l'affichage du tooltip
-    const allNodes = svgCls.selectAll('g');
-
-    allNodes.selectAll('rect')
-        .on('mouseover', showTooltipRating)
-        .on('mouseout', hideTooltip);
-}
-
-// Fonction pour l'affichage du tooltip pour le treemap du genre
-function showTooltipGenre(event, d) {
-    const platformCounts = d3.rollup(d.data.items, v => v.length, d => d.platform);
-    let content = `<div class="bg-white p-3 rounded shadow-lg border border-gray-200">
-        <p class="font-bold mb-2">${d.data.genre}</p>`;
-    for (const [platform, count] of platformCounts) {
-        content += `<p>${platform}: ${count}</p>`;
-    }
-    content += `<p class="font-bold mt-2">Total: ${d.data.value}</p></div>`;
-    d3.select('body').append('div')
-        .attr('class', 'tooltip absolute z-50')
-        .style('left', (event.pageX + 10) + 'px')
-        .style('top', (event.pageY - 10) + 'px')
-        .html(content);
-}
-// Fonction pour l'`affichage du tooltip pour le treemap de la classification d'âge
-function showTooltipRating(event, d) {
-  const platformCounts = d3.rollup(d.data.items, v => v.length, d => d.platform);
-  let content = `<div class="bg-white p-3 rounded shadow-lg border border-gray-200">
-      <p class="font-bold mb-2">${d.data.rating}</p>`;
-  for (const [platform, count] of platformCounts) {
-      content += `<p>${platform}: ${count}</p>`;
-  }
-  content += `<p class="font-bold mt-2">Total: ${d.data.value}</p></div>`;
-  d3.select('body').append('div')
-      .attr('class', 'tooltip absolute z-50')
-      .style('left', (event.pageX + 10) + 'px')
-      .style('top', (event.pageY - 10) + 'px')
-      .html(content);
-}
-
-// Fonction pour cacher le tooltip
-function hideTooltip() {
-    d3.selectAll('.tooltip').remove();
-}
-
-// -----------------------------------------------
-// Evolution du contenu
-// -----------------------------------------------
-
-// Initialisation des couleurs des plateformes
+// Platform colors
 const platformColors = {
     "Netflix": "#E50914",
     "Hulu": "#1CE783",
     "Disney": "#113CCF",
     "Amazon": "#00A8E1"
 };
+
+// -----------------------------------------------
+// Treemap Genre and Rating Visualization
+// -----------------------------------------------
+const width = 1260;
+const height = 460;
+
+// Create SVG elements for visualizations
+const svgGenre = d3.select('#visualizationGenre')
+  .append('svg')
+  .attr('width', width)
+  .attr('height', height)
+  .style('font', '10px sans-serif');
+
+const svgCls = d3.select('#visualizationCls')
+  .append('svg')
+  .attr('width', width)
+  .attr('height', height)
+  .style('font', '10px sans-serif');
+
+// Color scale for non-platform categories
+const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+
+let currentNode = null;  // Récupérer le noeud objet de zoom
+let nodeStack = []; // Garder mémoire l'historique de zoom
+
+// Variables pour le filtrage voir tout
+let isYearFilterEnabledGenre = true;
+let isYearFilterEnabledCls = true;
+
+d3.csv('streaming_data.csv').then(function(data) {
+  data.forEach(d => {
+    d.year_added = +d.year_added;
+    d.duration_num = +d.duration_num;
+  });
+
+  const years = [...new Set(data.map(d => d.year_added))].sort();
+  const continents = ['All', ...new Set(data.map(d => d.continent))];
+  const types = ['All', ...new Set(data.map(d => d.type))];
+
+  // Initialize filters
+  setupFilters(years, continents, types, "Genre");
+  setupFilters(years, continents, types, "Cls");
+
+  // Initialize visualizations
+  updateVisualization(data, 'genre', svgGenre);
+  updateVisualization(data, 'rating', svgCls);
+
+  // Event handlers
+  document.getElementById('yearSliderGenre').addEventListener('input', () => updateVisualization(data, 'genre', svgGenre));
+  document.getElementById('continentSelectGenre').addEventListener('change', () => updateVisualization(data, 'genre', svgGenre));
+  document.getElementById('typeSelectGenre').addEventListener('change', () => updateVisualization(data, 'genre', svgGenre));
+
+  document.getElementById('yearSliderCls').addEventListener('input', () => updateVisualization(data, 'rating', svgCls));
+  document.getElementById('continentSelectCls').addEventListener('change', () => updateVisualization(data, 'rating', svgCls));
+  document.getElementById('typeSelectCls').addEventListener('change', () => updateVisualization(data, 'rating', svgCls));
+
+  document.getElementById('voirToutBtnCls').addEventListener('click', () => toggleVoirTout(data, 'rating', svgCls));
+  document.getElementById('voirToutBtnGenre').addEventListener('click', () => toggleVoirTout(data, 'genre', svgCls));
+});
+
+function setupFilters(years, continents, types, info) {
+  const yearSlider = document.getElementById('yearSlider' + info);
+  yearSlider.min = Math.min(...years);
+  yearSlider.max = Math.max(...years);
+  yearSlider.value = yearSlider.max;
+  document.getElementById('yearValue' + info).textContent = yearSlider.value;
+
+  const continentSelect = document.getElementById('continentSelect' + info);
+  continentSelect.innerHTML = continents.map(c => 
+    `<option value="${c}">${c}</option>`).join('');
+
+  const typeSelect = document.getElementById('typeSelect' + info);
+  typeSelect.innerHTML = types.map(t => 
+    `<option value="${t}">${t}</option>`).join('');
+}
+
+function updateVisualization(data, type, svg) {
+  const prefix = type === 'genre' ? 'Genre' : 'Cls';
+  const yearValue = document.getElementById(`yearSlider${prefix}`).value;
+  const continentValue = document.getElementById(`continentSelect${prefix}`).value;
+  const typeValue = document.getElementById(`typeSelect${prefix}`).value;
+  document.getElementById(`yearValue${prefix}`).textContent = yearValue;
+
+  let filtered = null;
+
+  if (prefix == 'Cls' && isYearFilterEnabledCls) {
+    filtered = data.filter(d => {
+      return d.year_added == yearValue &&
+        (continentValue === 'All' || d.continent === continentValue) &&
+        (typeValue === 'All' || d.type === typeValue);
+    });
+  } else if (prefix == 'Genre' && isYearFilterEnabledGenre) {
+    filtered = data.filter(d => {
+      return d.year_added == yearValue &&
+        (continentValue === 'All' || d.continent === continentValue) &&
+        (typeValue === 'All' || d.type === typeValue);
+    });
+  } else {
+    filtered = data.filter(d => {
+      return (continentValue === 'All' || d.continent === continentValue) &&
+        (typeValue === 'All' || d.type === typeValue);
+    });
+  }
+  
+
+  const groups = d3.group(filtered, d => type === 'genre' ? d.genre : d.rating);
+  const hierarchyData = {
+    name: type === 'genre' ? "All Genres" : "All Ratings",
+    children: Array.from(groups, ([name, items]) => ({
+      name,
+      value: items.length,
+      items
+    }))
+  };
+
+  svg.selectAll("*").remove();
+
+  const root = d3.hierarchy(hierarchyData)
+    .sum(d => d.value)
+    .sort((a, b) => b.value - a.value);
+
+  const treemap = d3.treemap()
+    .size([width, height])
+    .paddingTop(28)
+    .paddingRight(7)
+    .paddingInner(3);
+
+  treemap(root);
+
+  const cell = svg
+    .selectAll("g")
+    .data(root.descendants())
+    .join("g")
+    .attr("transform", d => `translate(${d.x0},${d.y0})`);
+
+  cell.append("rect")
+    .attr("width", d => d.x1 - d.x0)
+    .attr("height", d => d.y1 - d.y0)
+    .attr("fill-opacity", 0.6)
+    .attr("fill", d => {
+      if (d.depth === 0) return "#fff";  // Root node is white
+      if (d.data.items && d.data.items[0].platform) {
+        return platformColors[d.data.name] || colorScale(d.data.name);
+      }
+      return colorScale(d.data.name);
+    })
+    .style("cursor", "pointer")
+    .on("click", (event, d) => zoom(d));
+
+  cell.append("text")
+    .attr("x", 4)
+    .attr("y", 13)
+    .text(d => `${d.data.name} (${d.value})`);
+
+  function zoom(node) {
+    if (node === currentNode && nodeStack.length > 1) {
+      // Reset to initial treemap if we click the same node again
+      nodeStack.pop();
+      const previousNode = nodeStack[nodeStack.length - 1];
+      resetZoom(previousNode);
+    } else {
+      // Zoom into the clicked node
+      nodeStack.push(node);
+      currentNode = node;
+      
+      // Create a platform breakdown for the clicked node
+      const platformCounts = d3.rollup(node.data.items, v => v.length, d => d.platform);
+
+      // Create a new hierarchy for the platform breakdown (subtree)
+      const platformHierarchy = {
+        name: "Platforms",
+        children: Array.from(platformCounts, ([platform, count]) => ({
+          name: platform,
+          value: count,
+          platform
+        }))
+      };
+
+      const platformRoot = d3.hierarchy(platformHierarchy)
+        .sum(d => d.value)
+        .sort((a, b) => b.value - a.value);
+
+      // Update the treemap with platform-level data
+      const treemap = d3.treemap()
+        .size([width, height])
+        .paddingTop(28)
+        .paddingRight(7)
+        .paddingInner(3);
+
+      treemap(platformRoot);
+
+      svg.selectAll("*").remove(); // Remove previous treemap nodes
+
+      const platformCell = svg
+        .selectAll("g")
+        .data(platformRoot.descendants())
+        .join("g")
+        .attr("transform", d => `translate(${d.x0},${d.y0})`);
+
+      platformCell.append("rect")
+        .attr("width", d => d.x1 - d.x0)
+        .attr("height", d => d.y1 - d.y0)
+        .attr("fill-opacity", 0.6)
+        .attr("fill", d => d.depth === 1 ? platformColors[d.data.platform] : "#fff")  // No fill for total node
+        .style("cursor", "pointer")
+        .on("click", (event, d) => zoom(d)); // Recursive zoom for platform nodes
+
+      platformCell.append("text")
+        .attr("x", 4)
+        .attr("y", 13)
+        .text(d => `${d.data.name} (${d.value})`);
+    }
+  }
+
+  function resetZoom(node) {
+    // Clear previous zoom state
+    svg.selectAll("*").remove(); 
+
+    // Return to the top level (root)
+    updateVisualization(data, type, svg);
+    nodeStack = [];  // Clear the stack to reset zoom history
+    currentNode = null;  // Reset current zoom state
+  }
+}
+
+function toggleVoirTout(data, type, svg) {
+  if (type === 'genre') {
+    isYearFilterEnabledGenre = !isYearFilterEnabledGenre;
+    const yearSlider = document.getElementById('yearSliderGenre');
+    const yearLabel = document.getElementById('yearValueGenre');
+    if (isYearFilterEnabledGenre) {
+      yearSlider.disabled = false;
+      yearLabel.textContent = yearSlider.value;
+      document.getElementById('voirToutBtnGenre').textContent = 'Voir tout';
+    } else {
+      yearSlider.disabled = true;
+      yearLabel.textContent = 'Tous les ans';
+      document.getElementById('voirToutBtnGenre').textContent = 'Filtrer par année';
+    }
+    updateVisualization(data, 'genre', svgGenre);
+  } else if (type === 'rating') {
+    isYearFilterEnabledCls = !isYearFilterEnabledCls;
+    const yearSlider = document.getElementById('yearSliderCls');
+    const yearLabel = document.getElementById('yearValueCls');
+    if (isYearFilterEnabledCls) {
+      yearSlider.disabled = false;
+      yearLabel.textContent = yearSlider.value;
+      document.getElementById('voirToutBtnCls').textContent = 'Voir tout';
+    } else {
+      yearSlider.disabled = true;
+      yearLabel.textContent = 'Tous les ans';
+      document.getElementById('voirToutBtnCls').textContent = 'Filtrer par année';
+    }
+    updateVisualization(data, 'rating', svgCls);
+  }
+}
+// -----------------------------------------------
+// Evolution du contenu
+// -----------------------------------------------
 
 // Fonction pour la création des graphiques d'évolution
 function createChart(containerId, data, metric, yAxisLabel) {
