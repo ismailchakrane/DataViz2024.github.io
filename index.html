@@ -45,46 +45,86 @@
         </div>
     </div>
 
-    <!-- Graphique de visualisation comparative du genre -->
-<div class="bg-white p-6">
-  <div class="flex">
-    <div id="visualizationGenre" class="overflow-auto"></div>
-    <div class="ml-6 w-64">
-      <div class="mb-4">
-        <label class="block text-sm font-semibold text-gray-700 mb-2">
-          Année: <span id="yearValueGenre" class="ml-2"></span>
-        </label>
-        <input type="range" id="yearSliderGenre" class="w-full h-2 rounded-lg cursor-pointer">
-      </div>
+  <!-- Graphique de l'évolution temporelle -->
+    <div class="container mx-auto p-6">
+      <div class="grid grid-cols-5 gap-6">
+        <div class="col-span-4 space-y-6">
+          <div class="bg-white p-6">
+              <h2 class="text-lg font-semibold mb-4">Quantité de contenu par année</h2>
+              <div id="content-quantity-chart"></div>
+          </div>
 
-      <div class="mb-4">
-        <label for="continentSelectGenre" class="block text-sm font-semibold text-gray-700 mb-2">
-          Continent
-        </label>
-        <select id="continentSelectGenre" class="w-full rounded-md border border-gray-300 p-2">
-        </select>
-      </div>
+          <div class="bg-white p-6">
+              <h2 class="text-lg font-semibold mb-4">Durée des films par année (en minutes)</h2>
+              <div id="movie-duration-chart"></div>
+          </div>
 
-      <div>
-        <label for="typeSelectGenre" class="block text-sm font-semibold text-gray-700 mb-2">
-          Type
-        </label>
-        <select id="typeSelectGenre" class="w-full rounded-md border border-gray-300 p-2">
-        </select>
-      </div>
-
-      <!-- "Voir tout" Button -->
-      <div class="mt-4 text-center">
-        <button id="voirToutBtnGenre" class="bg-blue-500 text-white px-4 py-2 rounded-md">
-          Voir tout
-        </button>
+          <div class="bg-white p-6">
+              <h2 class="text-lg font-semibold mb-4">Nombre de saisons par année</h2>
+              <div id="tv-seasons-chart"></div>
+          </div>
+        </div>
+        <div class="col-span-1 space-y-6">
+          <div class="bg-white p-6 space-y-6">
+            <div class="mb-4">
+              <label for="audience-select" class="block text-sm font-semibold text-gray-700 mb-2">
+                Audience
+              </label>
+              <select id="audience-select" class="w-full rounded-md border border-gray-300 p-2">
+              </select>
+            </div>
+            <div>
+              <label for="continent-select" class="block text-sm font-semibold text-gray-700 mb-2">
+                Continent
+              </label>
+              <select id="continent-select" class="w-full rounded-md border border-gray-300 p-2">
+              </select>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
+
+    <!-- Graphique de visualisation comparative du genre -->
+  <div class="bg-white p-6">
+    <div class="flex">
+      <div id="visualizationGenre" class="overflow-auto"></div>
+      <div class="ml-6 w-64">
+        <div class="mb-4">
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            Année: <span id="yearValueGenre" class="ml-2"></span>
+          </label>
+          <input type="range" id="yearSliderGenre" class="w-full h-2 rounded-lg cursor-pointer">
+        </div>
+
+        <div class="mb-4">
+          <label for="continentSelectGenre" class="block text-sm font-semibold text-gray-700 mb-2">
+            Continent
+          </label>
+          <select id="continentSelectGenre" class="w-full rounded-md border border-gray-300 p-2">
+          </select>
+        </div>
+
+        <div>
+          <label for="typeSelectGenre" class="block text-sm font-semibold text-gray-700 mb-2">
+            Type
+          </label>
+          <select id="typeSelectGenre" class="w-full rounded-md border border-gray-300 p-2">
+          </select>
+        </div>
+
+        <!-- "Voir tout" Button -->
+        <div class="mt-4 text-center">
+          <button id="voirToutBtnGenre" class="bg-blue-500 text-white px-4 py-2 rounded-md">
+            Voir tout
+          </button>
+        </div>
+      </div>
+    </div>
+    <h4 class="text-center font-bold mb-8 text-gray-800">
+      Répartition du contenu par genre
+    </h4>
   </div>
-  <h4 class="text-center font-bold mb-8 text-gray-800">
-    Répartition du contenu par genre
-  </h4>
-</div>
 
   <!-- Graphique de visualisation comparative de la classification d'age-->
   <div class="bg-white mt-8 p-6">
@@ -126,46 +166,6 @@
       Répartition du contenu par classification d'age
     </h4>
   </div>
-
-    <!-- Graphique de l'évolution temporelle -->
-    <div class="container mx-auto p-6">
-      <div class="grid grid-cols-5 gap-6">
-        <div class="col-span-4 space-y-6">
-          <div class="bg-white p-6">
-              <h2 class="text-lg font-semibold mb-4">Quantité de contenu par année</h2>
-              <div id="content-quantity-chart"></div>
-          </div>
-
-          <div class="bg-white p-6">
-              <h2 class="text-lg font-semibold mb-4">Durée des films par année (en minutes)</h2>
-              <div id="movie-duration-chart"></div>
-          </div>
-
-          <div class="bg-white p-6">
-              <h2 class="text-lg font-semibold mb-4">Nombre de saisons par année</h2>
-              <div id="tv-seasons-chart"></div>
-          </div>
-        </div>
-        <div class="col-span-1 space-y-6">
-          <div class="bg-white p-6 space-y-6">
-            <div class="mb-4">
-              <label for="audience-select" class="block text-sm font-semibold text-gray-700 mb-2">
-                Audience
-              </label>
-              <select id="audience-select" class="w-full rounded-md border border-gray-300 p-2">
-              </select>
-            </div>
-            <div>
-              <label for="continent-select" class="block text-sm font-semibold text-gray-700 mb-2">
-                Continent
-              </label>
-              <select id="continent-select" class="w-full rounded-md border border-gray-300 p-2">
-              </select>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
 
   <!-- Pied de page avec informations sur le projet -->
   <footer class="bg-gradient-to-r from-red-500 to-blue-500 text-white py-4">
