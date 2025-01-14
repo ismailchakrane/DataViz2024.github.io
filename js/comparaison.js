@@ -113,18 +113,18 @@ d3.csv("data/streaming_data.csv").then(function (data) {
 
       if (isMovieCheckedGenre && isTVShowCheckedGenre) {
         typeGenre =  "All";
-        updateVisualization(data, "rating", svgGenre);
+        updateVisualization(data, "genre", svgGenre);
       } else if (isMovieCheckedGenre) {
         typeGenre =  "Movie";
-        updateVisualization(data, "rating", svgGenre);
+        updateVisualization(data, "genre", svgGenre);
       } else if (isTVShowCheckedGenre) {
         typeGenre = "TV Show";
-        updateVisualization(data, "rating", svgGenre);
+        updateVisualization(data, "genre", svgGenre);
       } else {
         typeGenre = "All";
         document.getElementById("movieCheckboxGenre").checked = true;
         document.getElementById("tvShowCheckboxGenre").checked = true;
-        updateVisualization(data, "rating", svgGenre);
+        updateVisualization(data, "genre", svgGenre);
       }
 
     });
