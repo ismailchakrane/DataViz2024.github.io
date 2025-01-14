@@ -35,9 +35,11 @@ const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 let currentNode = null; // Récupérer le noeud objet de zoom
 let nodeStack = []; // Garder mémoire l'historique de zoom
 
-// Variables pour le filtrage voir tout
+// Variables pour le filtrage
 let isYearFilterEnabledGenre = true;
 let isYearFilterEnabledCls = true;
+let typeCls = "All";
+let typeGenre = "All";
 
 d3.csv("data/streaming_data.csv").then(function (data) {
   data.forEach((d) => {
@@ -50,8 +52,8 @@ d3.csv("data/streaming_data.csv").then(function (data) {
   const types = ["All", ...new Set(data.map((d) => d.type))];
 
   // Initalisation des filtres
-  setupFilters(years, continents, types, "Genre");
-  setupFilters(years, continents, types, "Cls");
+  setupFilters(years, continents, "Genre");
+  setupFilters(years, continents, "Cls");
 
   // Initialisation des visus
   updateVisualization(data, "genre", svgGenre);
@@ -69,23 +71,12 @@ d3.csv("data/streaming_data.csv").then(function (data) {
       updateVisualization(data, "genre", svgGenre)
     );
   document
-    .getElementById("typeSelectGenre")
-    .addEventListener("change", () =>
-      updateVisualization(data, "genre", svgGenre)
-    );
-
-  document
     .getElementById("yearSliderCls")
     .addEventListener("input", () =>
       updateVisualization(data, "rating", svgCls)
     );
   document
     .getElementById("continentSelectCls")
-    .addEventListener("change", () =>
-      updateVisualization(data, "rating", svgCls)
-    );
-  document
-    .getElementById("typeSelectCls")
     .addEventListener("change", () =>
       updateVisualization(data, "rating", svgCls)
     );
@@ -96,9 +87,51 @@ d3.csv("data/streaming_data.csv").then(function (data) {
   document
     .getElementById("voirToutBtnGenre")
     .addEventListener("click", () => toggleVoirTout(data, "genre", svgGenre));
+
+  document.querySelectorAll("input[type='checkbox']").forEach(checkbox => {
+    checkbox.addEventListener("change", () => {
+      const isMovieCheckedCls = document.getElementById("movieCheckboxCls").checked;
+      const isTVShowCheckedCls = document.getElementById("tvShowCheckboxCls").checked;
+      const isMovieCheckedGenre = document.getElementById("movieCheckboxGenre").checked;
+      const isTVShowCheckedGenre = document.getElementById("tvShowCheckboxGenre").checked;
+  
+      if (isMovieCheckedCls && isTVShowCheckedCls) {
+        typeCls =  "All";
+        updateVisualization(data, "rating",svgCls);
+      } else if (isMovieCheckedCls) {
+        typeCls =  "Movie";
+        updateVisualization(data, "rating", svgCls);
+      } else if (isTVShowCheckedCls) {
+        typeCls = "TV Show";
+        updateVisualization(data, "rating", svgCls);
+      } else {
+        typeCls = "All";
+        document.getElementById("movieCheckboxCls").checked = true;
+        document.getElementById("tvShowCheckboxCls").checked = true;
+        updateVisualization(data, "rating", svgCls);
+      }
+
+      if (isMovieCheckedGenre && isTVShowCheckedGenre) {
+        typeGenre =  "All";
+        updateVisualization(data, "rating", svgGenre);
+      } else if (isMovieCheckedGenre) {
+        typeGenre =  "Movie";
+        updateVisualization(data, "rating", svgGenre);
+      } else if (isTVShowCheckedGenre) {
+        typeGenre = "TV Show";
+        updateVisualization(data, "rating", svgGenre);
+      } else {
+        typeGenre = "All";
+        document.getElementById("movieCheckboxGenre").checked = true;
+        document.getElementById("tvShowCheckboxGenre").checked = true;
+        updateVisualization(data, "rating", svgGenre);
+      }
+
+    });
+  }); 
 });
 
-function setupFilters(years, continents, types, info) {
+function setupFilters(years, continents, info) {
   const yearSlider = document.getElementById("yearSlider" + info);
   yearSlider.min = Math.min(...years);
   yearSlider.max = Math.max(...years);
@@ -109,20 +142,18 @@ function setupFilters(years, continents, types, info) {
   continentSelect.innerHTML = continents
     .map((c) => `<option value="${c}">${c}</option>`)
     .join("");
-
-  const typeSelect = document.getElementById("typeSelect" + info);
-  typeSelect.innerHTML = types
-    .map((t) => `<option value="${t}">${t}</option>`)
-    .join("");
 }
 
 function updateVisualization(data, type, svg) {
   const prefix = type === "genre" ? "Genre" : "Cls";
+  const typeValue = type === "genre" ? typeGenre : typeCls;
+
   const yearSlider = document.getElementById(`yearSlider${prefix}`);
+
   const continentValue = document.getElementById(
     `continentSelect${prefix}`
   ).value;
-  const typeValue = document.getElementById(`typeSelect${prefix}`).value;
+
   let yearValue = undefined;
   if (!yearSlider.disabled) {
     yearValue = yearSlider.value;
@@ -474,8 +505,8 @@ d3.csv("data/streaming_data.csv").then(function (rawData) {
     .map((c) => `<option value="${c}">${c}</option>`)
     .join("");
 
-  const typeSelect = document.getElementById("audience-select");
-  typeSelect.innerHTML = audiences
+  const audienceSelect = document.getElementById("audience-select");
+  audienceSelect.innerHTML = audiences
     .map((t) => `<option value="${t}">${t}</option>`)
     .join("");
 
