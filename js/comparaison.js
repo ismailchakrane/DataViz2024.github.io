@@ -11,7 +11,7 @@ const platformColors = {
 // -----------------------------------------------
 // Treemap Genre and Rating Visualization
 // -----------------------------------------------
-const width = 1260;
+const width = 1500;
 const height = 460;
 
 // Create SVG elements for visualizations
