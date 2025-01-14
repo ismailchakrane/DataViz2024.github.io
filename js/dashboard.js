@@ -27,6 +27,7 @@ const colorPalettes = {
 let year = "2021";
 let audience = "All";
 let continent = "All";
+let currentPlatform = "Netflix";
 let isYearFilterEnabled = true;
 
 d3.csv("data/streaming_data.csv").then(function (data) {
@@ -35,49 +36,48 @@ d3.csv("data/streaming_data.csv").then(function (data) {
     d.duration_num = +d.duration_num;
   });
 
-  const years = [...new Set(data.map((d) => d.year_added))].sort();
-
   // Initialisation des filtres
-  setupFilters(years);
+  setupFilters(data, currentPlatform);
   // Utilisation de la palette de couleurs Netflix par défaut
-  updatePlatform("Netflix");
+  updatePlatform(currentPlatform);
   // Initialisation de la visualisation avec Netflix
   updateVisualisation(
     data,
-    "Netflix",
-    colorPalettes["Netflix"],
+    currentPlatform,
+    colorPalettes[currentPlatform],
     year,
     audience,
     continent
   );
 
   // Gestion des événements pour la mise à jour des visualisations
-  document.getElementById("platform-select").addEventListener("change", (e) => {
-    const currentYear = document.getElementById("year-slider").value;
-    updatePlatform(e.target.value);
-    updateVisualisation(
-      data,
-      e.target.value,
-      colorPalettes[e.target.value],
-      currentYear,
-      audience,
-      continent
-    );
-  });
-  document.getElementById("year-slider").addEventListener("input", (e) => {
-    const currentPlatform = document.getElementById("platform-select").value;
-    updateVisualisation(
-      data,
-      currentPlatform,
-      colorPalettes[currentPlatform],
-      e.target.value,
-      audience,
-      continent
-    );
-  });
+  document.querySelectorAll("#platform-row a").forEach((platformElement) => {
+    platformElement.addEventListener("click", (e) => {
+      e.preventDefault();
+  
+      document.querySelectorAll("#platform-row a").forEach(el => el.classList.remove("glow"));
+      platformElement.classList.add("glow");
+
+      const selectedPlatform = platformElement.getAttribute("data-platform");
+      
+      const activeButton = document.querySelector("#yearButtons button.bg-blue-500");
+      const currentYear = activeButton ? activeButton.textContent : latestYear.toString();
+  
+      updatePlatform(selectedPlatform);
+      updateVisualisation(
+        data,
+        selectedPlatform,
+        colorPalettes[selectedPlatform],
+        currentYear,
+        audience,
+        continent
+      );
+      setupFilters(data, selectedPlatform);
+    });
+  }); 
   document.getElementById("voirToutBtn").addEventListener("click", () => {
-    const currentPlatform = document.getElementById("platform-select").value;
-    const currentYear = document.getElementById("year-slider").value;
+    const activeButton = document.querySelector("#yearButtons button.bg-blue-500");
+    const currentYear = activeButton ? activeButton.textContent : latestYear.toString();
     toggleVoirTout(
       data,
       currentPlatform,
@@ -91,6 +91,9 @@ d3.csv("data/streaming_data.csv").then(function (data) {
 
 // Fonction pour mettre à jour la palette de couleurs suivant la plateforme
 function updatePlatform(platform) {
+  // Mise à jour de la plateforme sélectionnée
+  currentPlatform = platform;
+
   // Récupération de la palette de couleurs correspondant à la plateforme
   const palette = colorPalettes[platform];
 
@@ -120,12 +123,39 @@ function updatePlatform(platform) {
 }
 
 // Fonction pour initialiser les filtres
-function setupFilters(years) {
-  // Initialisation du slider pour les années
-  const yearSlider = document.getElementById("year-slider");
-  yearSlider.min = Math.min(...years);
-  yearSlider.max = Math.max(...years);
-  yearSlider.value = yearSlider.max;
+function setupFilters(data, platform) {
+  const platformData = data.filter((d) => d.platform === platform);
+  const years = [...new Set(platformData.map((d) => d.year_added))].sort();
+  
+  const yearButtons = d3.select("#yearButtons")
+    .selectAll("button")
+    .data(years)
+    .join("button")
+    .attr("class", "px-4 py-2 rounded-md transition-colors")
+    .text(d => d);
+
+  const latestYear = Math.max(...years);
+  updateSelectedYear(latestYear);
+
+  yearButtons.on("click", function(event, year) {
+    if (!document.getElementById("yearButtons").classList.contains("disabled")) {
+      updateSelectedYear(year);
+      updateVisualisation(
+        data,
+        platform,
+        colorPalettes[platform],
+        year.toString(),
+        audience,
+        continent
+      );
+    }
+  });
+
+  function updateSelectedYear(selectedYear) {
+    yearButtons
+      .classed("bg-blue-500 text-white", d => d === selectedYear)
+      .classed("bg-gray-700 text-gray-200 hover:bg-gray-600", d => d !== selectedYear);
+  }
 }
 
 // Function to update visualizations
@@ -147,9 +177,9 @@ function updateVisualisation(
       (audience === "All" || d.audience === audience)
   );
 
-  const yearSlider = document.getElementById("year-slider");
-  if (!yearSlider.disabled) {
-    document.getElementById("yearValue1").textContent = yearSlider.value;
+  const yearButtonsContainer = document.getElementById("yearButtons");
+  if (!yearButtonsContainer.classList.contains("disabled")) {
+    document.getElementById("yearValue1").textContent = year;
     document.getElementById("yearValue1").style.color = palette.primary;
     filteredData = data.filter(
       (d) =>
@@ -161,12 +191,7 @@ function updateVisualisation(
   } else {
     document.getElementById("yearValue1").textContent = "Tous les ans";
     document.getElementById("yearValue1").style.color = palette.primary;
-    filteredData = data.filter(
-      (d) =>
-        d.platform === platform &&
-        (continent === "All" || d.continent === continent) &&
-        (audience === "All" || d.audience === audience)
-    );
+    filteredData = releaseData;
   }
 
   if (filteredData.length === 0) {
@@ -658,21 +683,32 @@ function createReleaseChart(data, palette) {
 
 // Fonction pour créer la carte
 function createMap(data, platform, palette) {
-  // Suppression des éléments existants
   d3.select("#map svg").remove();
 
   const width = d3.select("#map").node().getBoundingClientRect().width;
   const height = d3.select("#map").node().getBoundingClientRect().height;
 
-  // Définition des palettes de couleurs pour chaque plateforme
+  const breaks = [1, 2, 5, 10, 20, 50, 100, 250];
+  
   const themes = {
-    Amazon: ["#FFE0B2", "#FFB74D", "#FB8C00", "#F57C00", "#E65100"],
-    Disney: ["#0288D1", "#1976D2", "#64B5F6", "#0D47A1", "#01579B"],
-    Hulu: ["#81C784", "#66BB6A", "#388E3C", "#2E7D32", "#1B5E20"],
-    Netflix: ["#E50914", "#F44336", "#D32F2F", "#C2185B", "#B71C1C"],
+    Amazon: [
+      "#FFF8E1", "#FFE0B2", "#FFB74D", "#FFA726", 
+      "#FB8C00", "#F57C00", "#EF6C00", "#E65100"
+    ],
+    Disney: [
+      "#E3F2FD", "#BBDEFB", "#90CAF9", "#64B5F6", 
+      "#42A5F5", "#2196F3", "#1E88E5", "#1976D2"
+    ],
+    Hulu: [
+      "#E8F5E9", "#C8E6C9", "#A5D6A7", "#81C784", 
+      "#66BB6A", "#4CAF50", "#43A047", "#388E3C"
+    ],
+    Netflix: [
+      "#FFEBEE", "#FFCDD2", "#EF9A9A", "#E57373", 
+      "#EF5350", "#F44336", "#E53935", "#D32F2F"
+    ],
   };
 
-  // Création de l'élément SVG pour la carte
   const svg = d3
     .select("#map")
     .append("svg")
@@ -693,12 +729,13 @@ function createMap(data, platform, palette) {
     .style("position", "absolute")
     .style("background", "#fff")
     .style("border", "1px solid #000")
-    .style("padding", "5px")
-    .style("pointer-events", "none");
+    .style("padding", "8px")
+    .style("border-radius", "4px")
+    .style("pointer-events", "none")
+    .style("box-shadow", "2px 2px 6px rgba(0, 0, 0, 0.3)");
 
   const colors = themes[platform];
 
-  // Création des données pour les pays
   const countryCounts = new Map();
   data.forEach((d) => {
     let country = d.country.trim();
@@ -740,11 +777,45 @@ function createMap(data, platform, palette) {
   }));
 
   const colorScale = d3
-    .scaleSequential()
-    .domain([0, d3.max(countryData, (d) => d.shows)])
-    .interpolator(d3.interpolateRgbBasis(colors));
+    .scaleThreshold()
+    .domain(breaks)
+    .range(colors);
 
-  // Chargement des données pour la carte
+  const legendWidth = 250;
+  const legendHeight = 20;
+  const legendMargin = { top: 20, right: 20, bottom: 30 };
+  
+  const legend = svg
+    .append("g")
+    .attr("transform", `translate(${width - legendWidth - legendMargin.right}, ${legendMargin.top})`);
+
+  const legendStops = breaks.map((value, i) => ({
+    value: value,
+    color: colors[i]
+  }));
+
+  const blockWidth = legendWidth / legendStops.length;
+  
+  legend.selectAll("rect")
+    .data(legendStops)
+    .enter()
+    .append("rect")
+    .attr("x", (d, i) => i * blockWidth)
+    .attr("width", blockWidth)
+    .attr("height", legendHeight)
+    .style("fill", d => d.color);
+
+  legend.selectAll("text")
+    .data(breaks)
+    .enter()
+    .append("text")
+    .attr("x", (d, i) => i * blockWidth)
+    .attr("y", legendHeight + 15)
+    .attr("text-anchor", "middle")
+    .style("font-size", "10px")
+    .style("fill", "white")
+    .text(d => d);
+
   d3.json("data/custom.geo.json").then((worldData) => {
     svg
       .selectAll("path")
@@ -753,6 +824,7 @@ function createMap(data, platform, palette) {
       .append("path")
       .attr("d", path)
       .attr("stroke", "white")
+      .attr("stroke-width", 0.5)
       .attr("fill", (d) => {
         const country = countryData.find(
           (c) => c.country === d.properties.name
@@ -766,7 +838,10 @@ function createMap(data, platform, palette) {
         if (country) {
           tooltip
             .html(
-              `<strong>${country.country}</strong><br><strong>Total Shows:</strong> ${country.shows}<br><strong>TV Shows:</strong> ${country.tvShows}<br><strong>Movies:</strong> ${country.movies}`
+              `<strong>${country.country}</strong><br>
+               <strong>Total Shows:</strong> ${country.shows}<br>
+               <strong>TV Shows:</strong> ${country.tvShows}<br>
+               <strong>Movies:</strong> ${country.movies}`
             )
             .style("left", event.pageX + 10 + "px")
             .style("top", event.pageY + 10 + "px")
@@ -842,7 +917,7 @@ function createAudienceChart(filteredData, palette, data) {
     .on("click", function (event, d) {
       audience = audience === d.key ? "All" : d.key;
       const currentPlatform = document.getElementById("platform-select").value;
-      const currentYear = document.getElementById("year-slider").value;
+      const currentYear = activeButton ? activeButton.textContent : latestYear.toString();
       updateVisualisation(
         data,
         currentPlatform,
@@ -934,7 +1009,7 @@ function createContinentChart(filteredData, palette, data) {
     .on("click", function (event, d) {
       continent = continent === d.key ? "All" : d.key;
       const currentPlatform = document.getElementById("platform-select").value;
-      const currentYear = document.getElementById("year-slider").value;
+      const currentYear = activeButton ? activeButton.textContent : latestYear.toString();
       updateVisualisation(
         data,
         currentPlatform,
@@ -966,13 +1041,23 @@ function createContinentChart(filteredData, palette, data) {
 // Fonction pour bloquer le filtrage par année ou non
 function toggleVoirTout(data, platform, palette, year, audience, continent) {
   isYearFilterEnabled = !isYearFilterEnabled;
-  const yearSlider = document.getElementById("year-slider");
+  const yearButtonsContainer = document.getElementById("yearButtons");
+  
   if (isYearFilterEnabled) {
-    yearSlider.disabled = false;
+    yearButtonsContainer.classList.remove("disabled");
     document.getElementById("voirToutBtn").textContent = "Voir tout";
+    yearButtonsContainer.querySelectorAll("button").forEach(button => {
+      button.style.pointerEvents = "auto";
+      button.style.opacity = "1";
+    });
   } else {
-    yearSlider.disabled = true;
+    yearButtonsContainer.classList.add("disabled");
     document.getElementById("voirToutBtn").textContent = "Filtrer par année";
+    yearButtonsContainer.querySelectorAll("button").forEach(button => {
+      button.style.pointerEvents = "none";
+      button.style.opacity = "0.5";
+    });
   }
+  
   updateVisualisation(data, platform, palette, year, audience, continent);
 }
