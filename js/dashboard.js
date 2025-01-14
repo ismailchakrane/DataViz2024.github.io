@@ -916,7 +916,7 @@ function createAudienceChart(filteredData, palette, data) {
     })
     .on("click", function (event, d) {
       audience = audience === d.key ? "All" : d.key;
-      const currentPlatform = document.getElementById("platform-select").value;
+      const activeButton = document.querySelector("#yearButtons button.bg-blue-500");
       const currentYear = activeButton ? activeButton.textContent : latestYear.toString();
       updateVisualisation(
         data,
@@ -1008,7 +1008,7 @@ function createContinentChart(filteredData, palette, data) {
     })
     .on("click", function (event, d) {
       continent = continent === d.key ? "All" : d.key;
-      const currentPlatform = document.getElementById("platform-select").value;
+      const activeButton = document.querySelector("#yearButtons button.bg-blue-500");
       const currentYear = activeButton ? activeButton.textContent : latestYear.toString();
       updateVisualisation(
         data,
