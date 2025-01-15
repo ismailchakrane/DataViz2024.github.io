@@ -97,3 +97,9 @@ svg {
   box-shadow: 10px 10px 10px rgba(255, 255, 255, 0.8);
   transition: box-shadow 0.3s ease;
 }
+
+.sticky-container {
+  position: sticky;
+  top: 6rem;
+  z-index: 10;
+}
