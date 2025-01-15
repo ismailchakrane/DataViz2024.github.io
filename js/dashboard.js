@@ -59,16 +59,13 @@ d3.csv("data/streaming_data.csv").then(function (data) {
       platformElement.classList.add("glow");
 
       const selectedPlatform = platformElement.getAttribute("data-platform");
-      
-      const activeButton = document.querySelector("#yearButtons button.bg-blue-500");
-      const currentYear = activeButton ? activeButton.textContent : latestYear.toString();
   
       updatePlatform(selectedPlatform);
       updateVisualisation(
         data,
         selectedPlatform,
         colorPalettes[selectedPlatform],
-        currentYear,
+        "2021",
         audience,
         continent
       );
