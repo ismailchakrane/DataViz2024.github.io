@@ -1,6 +1,6 @@
 import * as d3 from "https://cdn.skypack.dev/d3@7.6.1";
 
-// Platform colors
+// Couleurs des plateformes
 const platformColors = {
   Netflix: "#E50914",
   Hulu: "#1CE783",
@@ -9,12 +9,12 @@ const platformColors = {
 };
 
 // -----------------------------------------------
-// Treemap Genre and Rating Visualization
+// Visualisation Treemap par Genre et Classification
 // -----------------------------------------------
 const width = 1500;
 const height = 460;
 
-// Create SVG elements for visualizations
+// Création des éléments SVG pour les visualisations
 const svgGenre = d3
   .select("#visualizationGenre")
   .append("svg")
@@ -29,11 +29,11 @@ const svgCls = d3
   .attr("height", height)
   .style("font", "10px sans-serif");
 
-// Color scale for non-platform categories
+// Échelle de couleurs pour les catégories non-plateformes
 const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
-let currentNode = null; // Récupérer le noeud objet de zoom
-let nodeStack = []; // Garder mémoire l'historique de zoom
+let currentNode = null; // Récupérer le nœud objet de zoom
+let nodeStack = []; // Garder en mémoire l'historique de zoom
 
 // Variables pour le filtrage
 let isYearFilterEnabledGenre = true;
@@ -51,15 +51,15 @@ d3.csv("data/streaming_data.csv").then(function (data) {
   const continents = ["All", ...new Set(data.map((d) => d.continent))];
   const types = ["All", ...new Set(data.map((d) => d.type))];
 
-  // Initalisation des filtres
+  // Initialisation des filtres
   setupFilters(years, continents, "Genre");
   setupFilters(years, continents, "Cls");
 
-  // Initialisation des visus
+  // Initialisation des visualisations
   updateVisualization(data, "genre", svgGenre);
   updateVisualization(data, "rating", svgCls);
 
-  // Event handlers
+  // Gestionnaires d'événements
   document
     .getElementById("yearSliderGenre")
     .addEventListener("input", () =>
@@ -126,7 +126,6 @@ d3.csv("data/streaming_data.csv").then(function (data) {
         document.getElementById("tvShowCheckboxGenre").checked = true;
         updateVisualization(data, "genre", svgGenre);
       }
-
     });
   }); 
 });
@@ -191,7 +190,7 @@ function updateVisualization(data, type, svg) {
     type === "genre" ? d.genre : d.rating
   );
   const hierarchyData = {
-    name: type === "genre" ? "All Genres" : "All Ratings",
+    name: type === "genre" ? "Tous les genres" : "Toutes les classifications",
     children: Array.from(groups, ([name, items]) => ({
       name,
       value: items.length,
@@ -227,7 +226,7 @@ function updateVisualization(data, type, svg) {
     .attr("height", (d) => d.y1 - d.y0)
     .attr("fill-opacity", 0.6)
     .attr("fill", (d) => {
-      if (d.depth === 0) return "#fff"; // Root node is white
+      if (d.depth === 0) return "#fff"; // Nœud racine en blanc
       if (d.data.items && d.data.items[0].platform) {
         return platformColors[d.data.name] || colorScale(d.data.name);
       }
@@ -244,25 +243,25 @@ function updateVisualization(data, type, svg) {
 
   function zoom(node) {
     if (node === currentNode && nodeStack.length > 1) {
-      // Reset to initial treemap if we click the same node again
+      // Retour à la vue initiale si on clique sur le même nœud
       nodeStack.pop();
       const previousNode = nodeStack[nodeStack.length - 1];
       resetZoom(previousNode);
     } else {
-      // Zoom into the clicked node
+      // Zoom sur le nœud cliqué
       nodeStack.push(node);
       currentNode = node;
 
-      // Create a platform breakdown for the clicked node
+      // Création d'une répartition par plateforme pour le nœud cliqué
       const platformCounts = d3.rollup(
         node.data.items,
         (v) => v.length,
         (d) => d.platform
       );
 
-      // Create a new hierarchy for the platform breakdown (subtree)
+      // Création d'une nouvelle hiérarchie pour la répartition par plateforme
       const platformHierarchy = {
-        name: "Platforms",
+        name: "Plateformes",
         children: Array.from(platformCounts, ([platform, count]) => ({
           name: platform,
           value: count,
@@ -275,7 +274,7 @@ function updateVisualization(data, type, svg) {
         .sum((d) => d.value)
         .sort((a, b) => b.value - a.value);
 
-      // Update the treemap with platform-level data
+      // Mise à jour du treemap avec les données par plateforme
       const treemap = d3
         .treemap()
         .size([width, height])
@@ -285,7 +284,7 @@ function updateVisualization(data, type, svg) {
 
       treemap(platformRoot);
 
-      svg.selectAll("*").remove(); // Remove previous treemap nodes
+      svg.selectAll("*").remove(); // Suppression des nœuds précédents
 
       const platformCell = svg
         .selectAll("g")
@@ -299,10 +298,10 @@ function updateVisualization(data, type, svg) {
         .attr("height", (d) => d.y1 - d.y0)
         .attr("fill-opacity", 0.6)
         .attr("fill", (d) =>
-          d.depth === 1 ? platformColors[d.data.platform] : "#fff"
-        ) // No fill for total node
+          d.depth === 1 ? platformColors[d.platform] : "#fff"
+        ) // Pas de couleur pour le nœud total
         .style("cursor", "pointer")
-        .on("click", (event, d) => zoom(d)); // Recursive zoom for platform nodes
+        .on("click", (event, d) => zoom(d)); // Zoom récursif pour les nœuds de plateforme
 
       platformCell
         .append("text")
@@ -313,13 +312,13 @@ function updateVisualization(data, type, svg) {
   }
 
   function resetZoom(node) {
-    // Clear previous zoom state
+    // Effacement de l'état de zoom précédent
     svg.selectAll("*").remove();
 
-    // Return to the top level (root)
+    // Retour au niveau supérieur (racine)
     updateVisualization(data, type, svg);
-    nodeStack = []; // Clear the stack to reset zoom history
-    currentNode = null; // Reset current zoom state
+    nodeStack = []; // Effacement de la pile pour réinitialiser l'historique de zoom
+    currentNode = null; // Réinitialisation de l'état de zoom actuel
   }
 }
 
@@ -355,6 +354,7 @@ function toggleVoirTout(data, type, svg) {
     updateVisualization(data, "rating", svg);
   }
 }
+
 // -----------------------------------------------
 // Evolution du contenu
 // -----------------------------------------------
