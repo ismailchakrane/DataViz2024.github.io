@@ -52,143 +52,24 @@
         <p class="mb-2 font-bold">
           Sélectionnez une plateforme pour visualiser et analyser sa bibliothèque de contenu.
         </p>
-        <div
-        id="platform-row"
-        class="flex flex-wrap justify-center items-center p-6 w-full gap-4"
-      >
-        <!-- Netflix -->
-        <a
-          href="#"
-          class="
-            flex flex-col items-center space-y-2 w-[300px] p-6
-            rounded-lg border-2 border-transparent
-            bg-[#141414] text-gray-200
-            transition-colors duration-300
-            hover:border-[#E50914]
-            data-[selected=true]:bg-[#1f1f1f]
-      
-            /* Remove focus, active, and hover outlines/shadows */
-            appearance-none
-            outline-none
-            shadow-none
-            focus:outline-none
-            focus:ring-0
-            focus:shadow-none
-            active:outline-none
-            active:ring-0
-            active:shadow-none
-          "
-          data-platform="Netflix"
-          data-selected="false"
-        >
-          <img
-            src="images/netflix-logo.jpg"
-            alt="Netflix Logo"
-            class="h-16 w-auto"
-          />
-          <span class="text-base font-medium text-center">Netflix</span>
-        </a>
-      
-        <!-- Amazon -->
-        <a
-          href="#"
-          class="
-            flex flex-col items-center space-y-2 w-[300px] p-6
-            rounded-lg border-2 border-transparent
-            bg-[#232F3E] text-gray-200
-            transition-colors duration-300
-            hover:border-[#00A8E1]
-            data-[selected=true]:bg-[#2E3A45]
-      
-            /* Remove focus, active, and hover outlines/shadows */
-            appearance-none
-            outline-none
-            shadow-none
-            focus:outline-none
-            focus:ring-0
-            focus:shadow-none
-            active:outline-none
-            active:ring-0
-            active:shadow-none
-          "
-          data-platform="Amazon"
-          data-selected="false"
-        >
-          <img
-            src="images/prime-logo.png"
-            alt="Amazon Prime Video Logo"
-            class="h-16 w-auto"
-          />
-          <span class="text-base font-medium text-center">Amazon</span>
-        </a>
-      
-        <!-- Disney+ -->
-        <a
-          href="#"
-          class="
-            flex flex-col items-center space-y-2 w-[300px] p-6
-            rounded-lg border-2 border-transparent
-            bg-[#0C204F] text-gray-200
-            transition-colors duration-300
-            hover:border-[#113CCF]
-            data-[selected=true]:bg-[#162A68]
-      
-            /* Remove focus, active, and hover outlines/shadows */
-            appearance-none
-            outline-none
-            shadow-none
-            focus:outline-none
-            focus:ring-0
-            focus:shadow-none
-            active:outline-none
-            active:ring-0
-            active:shadow-none
-          "
-          data-platform="Disney"
-          data-selected="false"
-        >
-          <img
-            src="images/disney-plus-logo.webp"
-            alt="Disney+ Logo"
-            class="h-16 w-auto"
-          />
-          <span class="text-base font-medium text-center">Disney+</span>
-        </a>
-      
-        <!-- Hulu -->
-        <a
-          href="#"
-          class="
-            flex flex-col items-center space-y-2 w-[300px] p-6
-            rounded-lg border-2 border-transparent
-            bg-[#101820] text-gray-200
-            transition-colors duration-300
-            hover:border-[#1CE783]
-            data-[selected=true]:bg-[#1b2930]
-      
-            /* Remove focus, active, and hover outlines/shadows */
-            appearance-none
-            outline-none
-            shadow-none
-            focus:outline-none
-            focus:ring-0
-            focus:shadow-none
-            active:outline-none
-            active:ring-0
-            active:shadow-none
-          "
-          data-platform="Hulu"
-          data-selected="false"
-        >
-          <img
-            src="images/hulu-logo.jpg"
-            alt="Hulu Logo"
-            class="h-16 w-auto"
-          />
-          <span class="text-base font-medium text-center">Hulu</span>
-        </a>
-      </div>
-                     
+        <div id="platform-row" class="flex justify-center items-center p-6 w-full space-x-4">
+          <a href="#" class="flex flex-col items-center space-y-2 pt-4 glow" style="width: 300px;" data-platform="Netflix">
+            <img src="images/netflix-logo.jpg" alt="Netflix Logo" class="h-16 w-auto mx-auto" />
+            <span class="text-gray-200 text-base font-medium text-center">Netflix</span>
+          </a>
+          <a href="#" class="flex flex-col items-center space-y-2 pt-4" style="width: 300px;" data-platform="Amazon">
+            <img src="images/prime-logo.png" alt="Amazon Prime Video Logo" class="h-16 w-auto mx-auto" />
+            <span class="text-gray-200 text-base font-medium text-center">Amazon</span>
+          </a>
+          <a href="#" class="flex flex-col items-center space-y-2 pt-4" style="width: 300px;" data-platform="Disney">
+            <img src="images/disney-plus-logo.webp" alt="Disney+ Logo" class="h-16 w-auto mx-auto" />
+            <span class="text-gray-200 text-base font-medium text-center">Disney+</span>
+          </a>
+          <a href="#" class="flex flex-col items-center space-y-2 pt-4" style="width: 300px;" data-platform="Hulu">
+            <img src="images/hulu-logo.jpg" alt="Hulu Logo" class="h-16 w-auto mx-auto" />
+            <span class="text-gray-200 text-base font-medium text-center">Hulu</span>
+          </a>
+        </div>
       </div>
 
       <!-- Section principale des visualisations -->
