@@ -1,6 +1,6 @@
 import * as d3 from "https://cdn.skypack.dev/d3@7.6.1";
 
-// Definition de la palette de couleurs pour chaque plateforme
+// Definition of the color palette for each platform
 const colorPalettes = {
   Netflix: {
     background: "#141414",
@@ -36,11 +36,11 @@ d3.csv("data/streaming_data.csv").then(function (data) {
     d.duration_num = +d.duration_num;
   });
 
-  // Initialisation des filtres
+  // Initialization of filters
   setupFilters(data, currentPlatform);
-  // Utilisation de la palette de couleurs Netflix par défaut
+  // Using the default Netflix color palette
   updatePlatform(currentPlatform);
-  // Initialisation de la visualisation avec Netflix
+  // Initialize visualization with Netflix
   updateVisualisation(
     data,
     currentPlatform,
@@ -50,16 +50,18 @@ d3.csv("data/streaming_data.csv").then(function (data) {
     continent
   );
 
-  // Gestion des événements pour la mise à jour des visualisations
+  // Event handling for updating visualizations
   document.querySelectorAll("#platform-row a").forEach((platformElement) => {
     platformElement.addEventListener("click", (e) => {
       e.preventDefault();
-  
-      document.querySelectorAll("#platform-row a").forEach(el => el.classList.remove("glow"));
+
+      document
+        .querySelectorAll("#platform-row a")
+        .forEach((el) => el.classList.remove("glow"));
       platformElement.classList.add("glow");
 
       const selectedPlatform = platformElement.getAttribute("data-platform");
-  
+
       updatePlatform(selectedPlatform);
       updateVisualisation(
         data,
@@ -71,10 +73,14 @@ d3.csv("data/streaming_data.csv").then(function (data) {
       );
       setupFilters(data, selectedPlatform);
     });
-  }); 
+  });
   document.getElementById("voirToutBtn").addEventListener("click", () => {
-    const activeButton = document.querySelector("#yearButtons button.bg-blue-500");
-    const currentYear = activeButton ? activeButton.textContent : latestYear.toString();
+    const activeButton = document.querySelector(
+      "#yearButtons button.bg-blue-500"
+    );
+    const currentYear = activeButton
+      ? activeButton.textContent
+      : latestYear.toString();
     toggleVoirTout(
       data,
       currentPlatform,
@@ -86,21 +92,21 @@ d3.csv("data/streaming_data.csv").then(function (data) {
   });
 });
 
-// Fonction pour mettre à jour la palette de couleurs suivant la plateforme
+// Function to update the color palette according to the platform
 function updatePlatform(platform) {
-  // Mise à jour de la plateforme sélectionnée
+  // Update the selected platform
   currentPlatform = platform;
 
-  // Récupération de la palette de couleurs correspondant à la plateforme
+  // Retrieving the color palette corresponding to the platform
   const palette = colorPalettes[platform];
 
-  // Mise à jour des couleurs de fond et de texte
+  // Update background and text colors
   d3.select("#visualisations").style("background", palette.background);
 
-  // Suppression des éléments existants
+  // Delete existing elements
   d3.select("#platform").selectAll("*").remove();
 
-  // Création du texte pour la plateforme
+  // Creation of the text for the platform
   const svg = d3
     .select("#platform")
     .append("svg")
@@ -119,23 +125,26 @@ function updatePlatform(platform) {
     .style("font-family", "Arial Black");
 }
 
-// Fonction pour initialiser les filtres
+// Function to initialize filters
 function setupFilters(data, platform) {
   const platformData = data.filter((d) => d.platform === platform);
   const years = [...new Set(platformData.map((d) => d.year_added))].sort();
-  
-  const yearButtons = d3.select("#yearButtons")
+
+  const yearButtons = d3
+    .select("#yearButtons")
     .selectAll("button")
     .data(years)
     .join("button")
     .attr("class", "px-4 py-2 rounded-md transition-colors")
-    .text(d => d);
+    .text((d) => d);
 
   const latestYear = Math.max(...years);
   updateSelectedYear(latestYear);
 
-  yearButtons.on("click", function(event, year) {
-    if (!document.getElementById("yearButtons").classList.contains("disabled")) {
+  yearButtons.on("click", function (event, year) {
+    if (
+      !document.getElementById("yearButtons").classList.contains("disabled")
+    ) {
       updateSelectedYear(year);
       updateVisualisation(
         data,
@@ -150,8 +159,11 @@ function setupFilters(data, platform) {
 
   function updateSelectedYear(selectedYear) {
     yearButtons
-      .classed("bg-blue-500 text-white", d => d === selectedYear)
-      .classed("bg-gray-700 text-gray-200 hover:bg-gray-600", d => d !== selectedYear);
+      .classed("bg-blue-500 text-white", (d) => d === selectedYear)
+      .classed(
+        "bg-gray-700 text-gray-200 hover:bg-gray-600",
+        (d) => d !== selectedYear
+      );
   }
 }
 
@@ -276,9 +288,9 @@ function updateVisualisation(
   createAudienceChart(filteredData, palette, data);
 }
 
-// Fonction pour créer le graphique des genres
+// Function to create the gender graph
 function createGenresChart(filteredData, palette) {
-  // Création des données pour les genres
+  // Creating data for genres
   const genresData = d3.rollup(
     filteredData,
     (v) => v.length,
@@ -290,10 +302,10 @@ function createGenresChart(filteredData, palette) {
     value,
   }));
 
-  // Suppression des éléments existants
+  // Delete existing elements
   d3.select("#genres").selectAll("*").remove();
 
-  // Création du graphique à barres pour les genres
+  // Creating the bar chart for genres
   const svgGenres = d3
     .select("#genres")
     .append("svg")
@@ -306,7 +318,7 @@ function createGenresChart(filteredData, palette) {
   const width = 500 - margin.left - margin.right;
   const height = 400 - margin.top - margin.bottom;
 
-  // Ajout des échelles pour les axes x et y
+  // Add scales for x and y axes
   const xScaleGenres = d3
     .scaleLinear()
     .domain([0, d3.max(genresArray, (d) => d.value)])
@@ -318,7 +330,7 @@ function createGenresChart(filteredData, palette) {
     .range([0, height])
     .padding(0.1);
 
-  // Création du graphique
+  // Creating the graph
   const chart = svgGenres
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
@@ -354,9 +366,9 @@ function createGenresChart(filteredData, palette) {
   chart.append("g").call(d3.axisLeft(yScaleGenres));
 }
 
-// Fonction pour créer le graphique des ratings
+// Function to create the ratings graph
 function createRatingsChart(filteredData, palette) {
-  // Création des données pour les ratings
+  // Creating data for ratings
   const ratingsData = d3.rollup(
     filteredData,
     (v) => v.length,
@@ -368,10 +380,10 @@ function createRatingsChart(filteredData, palette) {
     value,
   }));
 
-  // Suppression des éléments existants
+  // Delete existing elements
   d3.select("#ratings").selectAll("*").remove();
 
-  // Création du graphique à barres pour les ratings
+  // Creating the bar chart for the ratings
   const svgRatings = d3
     .select("#ratings")
     .append("svg")
@@ -384,7 +396,7 @@ function createRatingsChart(filteredData, palette) {
   const width = 500 - margin.left - margin.right;
   const height = 400 - margin.top - margin.bottom;
 
-  // Ajout des échelles pour les axes x et y
+  // Add scales for x and y axes
   const xScaleRatings = d3
     .scaleLinear()
     .domain([0, d3.max(ratingsArray, (d) => d.value)])
@@ -396,7 +408,7 @@ function createRatingsChart(filteredData, palette) {
     .range([0, height])
     .padding(0.1);
 
-  // Création du graphique
+  // Creating the graph
   const chart = svgRatings
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
@@ -434,7 +446,7 @@ function createRatingsChart(filteredData, palette) {
 
 // Fonction pour créer le graphique en donut
 function createDonutChart(filteredData, palette, totalTitles) {
-  // Création des données pour les types
+  // Create data for types
   const typesData = d3.rollup(
     filteredData,
     (v) => v.length,
@@ -445,7 +457,7 @@ function createDonutChart(filteredData, palette, totalTitles) {
   // Suppression des éléments existants
   d3.select("#donut").selectAll("*").remove();
 
-  // Création du graphique en donut
+  // Creating the donut chart
   const svgDonut = d3
     .select("#donut")
     .append("svg")
@@ -460,7 +472,7 @@ function createDonutChart(filteredData, palette, totalTitles) {
 
   const radius = Math.min(width, height) / 2;
 
-  // Création du groupe pour le graphique
+  // Create the group for the graph
   const g = svgDonut
     .append("g")
     .attr(
@@ -501,7 +513,7 @@ function createDonutChart(filteredData, palette, totalTitles) {
     .style("visibility", "hidden")
     .style("font-size", "12px");
 
-  // Création des arcs pour les types
+  // Creating arcs for types
   const arc = g
     .selectAll(".arc")
     .data(pie(typesArray))
@@ -538,9 +550,9 @@ function createDonutChart(filteredData, palette, totalTitles) {
     .style("fill", palette.background);
 }
 
-// Fonction pour créer le graphique de type "Release"
+// Function to create the "Release" type graph
 function createReleaseChart(data, palette) {
-  // Création des données pour les années
+  // Creation of data for the years
   const years = [...new Set(data.map((d) => d.year_added))].sort();
 
   const movieCounts = years.map(
@@ -555,7 +567,7 @@ function createReleaseChart(data, palette) {
   // Suppression des éléments existants
   d3.select("#release").selectAll("*").remove();
 
-  // Création du graphique pour les releases
+  // Creating the graph for the releases
   const svg = d3
     .select("#release")
     .append("svg")
@@ -602,7 +614,7 @@ function createReleaseChart(data, palette) {
     .attr("stroke-width", 1.5)
     .attr("d", line);
 
-  // Ajout des points pour les releases avec des tooltips pour affichage de la valeur au survol pour les movies
+  // Added points for releases with tooltips to display the value on hover for movies
   const dotsMovies = g
     .selectAll(".dotMovie")
     .data(movieCounts)
@@ -632,7 +644,7 @@ function createReleaseChart(data, palette) {
       d3.select(this.parentNode).select("text").remove();
     });
 
-  // Ajout des points pour les releases avec des tooltips pour affichage de la valeur au survol pour les TV Shows
+  // Added points for releases with tooltips to display the value on hover for TV Shows
   const dotsTV = g
     .selectAll(".dotTV")
     .data(tvCounts)
@@ -686,23 +698,47 @@ function createMap(data, platform, palette) {
   const height = d3.select("#map").node().getBoundingClientRect().height;
 
   const breaks = [1, 2, 5, 10, 20, 50, 100, 250];
-  
+
   const themes = {
     Amazon: [
-      "#FFF8E1", "#FFE0B2", "#FFB74D", "#FFA726", 
-      "#FB8C00", "#F57C00", "#EF6C00", "#E65100"
+      "#FFF8E1",
+      "#FFE0B2",
+      "#FFB74D",
+      "#FFA726",
+      "#FB8C00",
+      "#F57C00",
+      "#EF6C00",
+      "#E65100",
     ],
     Disney: [
-      "#E3F2FD", "#BBDEFB", "#90CAF9", "#64B5F6", 
-      "#42A5F5", "#2196F3", "#1E88E5", "#1976D2"
+      "#E3F2FD",
+      "#BBDEFB",
+      "#90CAF9",
+      "#64B5F6",
+      "#42A5F5",
+      "#2196F3",
+      "#1E88E5",
+      "#1976D2",
     ],
     Hulu: [
-      "#E8F5E9", "#C8E6C9", "#A5D6A7", "#81C784", 
-      "#66BB6A", "#4CAF50", "#43A047", "#388E3C"
+      "#E8F5E9",
+      "#C8E6C9",
+      "#A5D6A7",
+      "#81C784",
+      "#66BB6A",
+      "#4CAF50",
+      "#43A047",
+      "#388E3C",
     ],
     Netflix: [
-      "#FFEBEE", "#FFCDD2", "#EF9A9A", "#E57373", 
-      "#EF5350", "#F44336", "#E53935", "#D32F2F"
+      "#FFEBEE",
+      "#FFCDD2",
+      "#EF9A9A",
+      "#E57373",
+      "#EF5350",
+      "#F44336",
+      "#E53935",
+      "#D32F2F",
     ],
   };
 
@@ -773,36 +809,40 @@ function createMap(data, platform, palette) {
     movies: counts.movies,
   }));
 
-  const colorScale = d3
-    .scaleThreshold()
-    .domain(breaks)
-    .range(colors);
+  const colorScale = d3.scaleThreshold().domain(breaks).range(colors);
 
   const legendWidth = 250;
   const legendHeight = 20;
   const legendMargin = { top: 20, right: 20, bottom: 30 };
-  
+
   const legend = svg
     .append("g")
-    .attr("transform", `translate(${width - legendWidth - legendMargin.right}, ${legendMargin.top})`);
+    .attr(
+      "transform",
+      `translate(${width - legendWidth - legendMargin.right}, ${
+        legendMargin.top
+      })`
+    );
 
   const legendStops = breaks.map((value, i) => ({
     value: value,
-    color: colors[i]
+    color: colors[i],
   }));
 
   const blockWidth = legendWidth / legendStops.length;
-  
-  legend.selectAll("rect")
+
+  legend
+    .selectAll("rect")
     .data(legendStops)
     .enter()
     .append("rect")
     .attr("x", (d, i) => i * blockWidth)
     .attr("width", blockWidth)
     .attr("height", legendHeight)
-    .style("fill", d => d.color);
+    .style("fill", (d) => d.color);
 
-  legend.selectAll("text")
+  legend
+    .selectAll("text")
     .data(breaks)
     .enter()
     .append("text")
@@ -811,7 +851,7 @@ function createMap(data, platform, palette) {
     .attr("text-anchor", "middle")
     .style("font-size", "10px")
     .style("fill", "white")
-    .text(d => d);
+    .text((d) => d);
 
   d3.json("data/custom.geo.json").then((worldData) => {
     svg
@@ -852,6 +892,7 @@ function createMap(data, platform, palette) {
 }
 
 // Fonction pour créer le graphique des audiences
+
 function createAudienceChart(filteredData, palette, data) {
   const audienceData = d3.rollup(
     filteredData,
@@ -913,8 +954,12 @@ function createAudienceChart(filteredData, palette, data) {
     })
     .on("click", function (event, d) {
       audience = audience === d.key ? "All" : d.key;
-      const activeButton = document.querySelector("#yearButtons button.bg-blue-500");
-      const currentYear = activeButton ? activeButton.textContent : latestYear.toString();
+      const activeButton = document.querySelector(
+        "#yearButtons button.bg-blue-500"
+      );
+      const currentYear = activeButton
+        ? activeButton.textContent
+        : latestYear.toString();
       updateVisualisation(
         data,
         currentPlatform,
@@ -943,7 +988,7 @@ function createAudienceChart(filteredData, palette, data) {
   chart.append("g").call(d3.axisLeft(yScale));
 }
 
-// Fonction pour créer le graphique des continents
+// Function to create the continents graph
 function createContinentChart(filteredData, palette, data) {
   const continentData = d3.rollup(
     filteredData,
@@ -1005,8 +1050,12 @@ function createContinentChart(filteredData, palette, data) {
     })
     .on("click", function (event, d) {
       continent = continent === d.key ? "All" : d.key;
-      const activeButton = document.querySelector("#yearButtons button.bg-blue-500");
-      const currentYear = activeButton ? activeButton.textContent : latestYear.toString();
+      const activeButton = document.querySelector(
+        "#yearButtons button.bg-blue-500"
+      );
+      const currentYear = activeButton
+        ? activeButton.textContent
+        : latestYear.toString();
       updateVisualisation(
         data,
         currentPlatform,
@@ -1036,25 +1085,26 @@ function createContinentChart(filteredData, palette, data) {
 }
 
 // Fonction pour bloquer le filtrage par année ou non
+
 function toggleVoirTout(data, platform, palette, year, audience, continent) {
   isYearFilterEnabled = !isYearFilterEnabled;
   const yearButtonsContainer = document.getElementById("yearButtons");
-  
+
   if (isYearFilterEnabled) {
     yearButtonsContainer.classList.remove("disabled");
     document.getElementById("voirToutBtn").textContent = "Voir tout";
-    yearButtonsContainer.querySelectorAll("button").forEach(button => {
+    yearButtonsContainer.querySelectorAll("button").forEach((button) => {
       button.style.pointerEvents = "auto";
       button.style.opacity = "1";
     });
   } else {
     yearButtonsContainer.classList.add("disabled");
     document.getElementById("voirToutBtn").textContent = "Filtrer par année";
-    yearButtonsContainer.querySelectorAll("button").forEach(button => {
+    yearButtonsContainer.querySelectorAll("button").forEach((button) => {
       button.style.pointerEvents = "none";
       button.style.opacity = "0.5";
     });
   }
-  
+
   updateVisualisation(data, platform, palette, year, audience, continent);
 }

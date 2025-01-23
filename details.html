@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,8 +8,9 @@
   <title>StreamViz: Explore the World of Streaming</title>
   <link rel="stylesheet" href="css/styles.css" />
 </head>
+
 <body>
-  <!-- Barre de navigation avec logo et menu -->
+  <!-- Navigation bar with logo and menu -->
   <nav class="bg-black text-white py-4">
     <div class="container mx-auto flex justify-between items-center px-4">
       <h1 class="text-lg font-bold">
@@ -24,7 +26,7 @@
   </nav>
 
   <div class="content">
-    <!-- En-tête avec titre du projet et auteurs -->
+    <!-- Header with project title and authors -->
     <div class="text-center" id="banner">
       <h1 class="text-2xl font-bold mt-8">
         Visualisation du contenu des plateformes de streaming
@@ -34,26 +36,33 @@
       </p>
     </div>
 
-    <!-- Section de présentation du projet avec dégradé de couleur -->
+    <!-- Project presentation section with color gradient -->
     <div class="bg-gradient-to-r from-red-500 to-blue-500 text-white py-6">
       <div class="container mx-auto px-4">
         <p>
-          Les utilisateurs des plateformes de streaming, tels que Netflix, souhaitent explorer le contenu disponible de manière personnalisée et analytique. Cependant, il est difficile pour eux de comprendre les caractéristiques du catalogue, comme la diversité des genres, la répartition géographique, les tendances au fil du temps, ou encore les comparatifs avec d'autres plateformes. Ce manque de visibilité limite leur capacité à choisir des plateformes adaptées à leurs préférences ou à découvrir des contenus spécifiques.
+          Les utilisateurs des plateformes de streaming, tels que Netflix, souhaitent explorer le contenu disponible de
+          manière personnalisée et analytique. Cependant, il est difficile pour eux de comprendre les caractéristiques
+          du catalogue, comme la diversité des genres, la répartition géographique, les tendances au fil du temps, ou
+          encore les comparatifs avec d'autres plateformes. Ce manque de visibilité limite leur capacité à choisir des
+          plateformes adaptées à leurs préférences ou à découvrir des contenus spécifiques.
         </p>
         <p class="mt-4">
-          Les données utilisées sont issues de Kaggle et contiennent les catalogues détaillés pour Netflix, Hulu, Disney+, Amazon Prime permettant des visualisations par plateforme et des comparaisons multi-plateformes sur la diversité et les tendances des contenus.
+          Les données utilisées sont issues de Kaggle et contiennent les catalogues détaillés pour Netflix, Hulu,
+          Disney+, Amazon Prime permettant des visualisations par plateforme et des comparaisons multi-plateformes sur
+          la diversité et les tendances des contenus.
         </p>
       </div>
     </div>
 
-    <!-- Menu déroulant pour la sélection de plateforme -->
+    <!-- Drop-down menu for platform selection -->
     <div class="bg-black text-white pt-4 pb-16" id="visualisations">
       <div class="container mx-auto px-4 text-center">
         <p class="mb-2 font-bold">
           Sélectionnez une plateforme pour visualiser et analyser sa bibliothèque de contenu.
         </p>
         <div id="platform-row" class="flex justify-center items-center p-6 w-full space-x-4">
-          <a href="#" class="flex flex-col items-center space-y-2 pt-4 glow" style="width: 300px;" data-platform="Netflix">
+          <a href="#" class="flex flex-col items-center space-y-2 pt-4 glow" style="width: 300px;"
+            data-platform="Netflix">
             <img src="images/netflix-logo.jpg" alt="Netflix Logo" class="h-16 w-auto mx-auto" />
             <span class="text-gray-200 text-base font-medium text-center">Netflix</span>
           </a>
@@ -72,9 +81,9 @@
         </div>
       </div>
 
-      <!-- Section principale des visualisations -->
+      <!-- Main Visualizations Section -->
       <div class="mt-8 grid gap-4 p-4">
-        <!-- Filtres -->
+        <!-- Filters -->
         <div class="grid grid-cols-[11fr_1fr] gap-4 items-center">
           <div>
             <div id="yearButtons" class="flex flex-wrap gap-2 justify-center"></div>
@@ -88,7 +97,7 @@
 
         <div id="data-message"></div>
 
-        <!-- Affichage des métriques principales -->
+        <!-- Displaying main metrics -->
         <div class="grid grid-cols-5 gap-4" id="dashboard-container">
           <div class="p-4">
             <h4 class="text-center font-bold mb-4 text-white">Total Titres</h4>
@@ -112,13 +121,13 @@
           </div>
         </div>
 
-        <!-- Grille des filtres -->
+        <!-- Filter grid -->
         <div class="grid grid-cols-2 gap-4" id="visualisation-container-3">
           <div id="audience" class="text-center p-4">Répartition des titres par audience</div>
           <div id="continent" class="text-center p-4">Répartition des titres par continent</div>
         </div>
 
-        <!-- Grille des graphiques -->
+        <!-- Chart Grid -->
         <div class="grid grid-cols-3 gap-4" id="visualisation-container-1">
           <div id="release" class="text-center p-4">Nombre de sorties par année</div>
           <div id="platform" class="p-4"></div>
@@ -131,17 +140,18 @@
         </div>
       </div>
 
-      <!-- Carte géographique -->
+      <!-- Geographic map -->
       <div class="grid grid-cols-1" id="map-container">
         <div id="map" class="text-center p-4">Répartition géographique du contenu</div>
       </div>
     </div>
 
-    <!-- Pied de page avec informations sur le projet -->
+    <!-- Footer with project information -->
     <footer class="bg-gradient-to-r from-red-500 to-blue-500 text-white py-4">
       <div class="container mx-auto text-center">
         <p>
-          Projet réalisé dans le cadre du cours de Data Visualization dispensé par Aurélien Tarard à l’Université Claude Bernard Lyon 1
+          Projet réalisé dans le cadre du cours de Data Visualization dispensé par Aurélien Tarard à l’Université Claude
+          Bernard Lyon 1
         </p>
         <p class="mt-2">Copyright &copy; 2024</p>
       </div>
@@ -150,5 +160,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
     <script type="module" src="js/dashboard.js"></script>
-  </body>
+</body>
+
 </html>

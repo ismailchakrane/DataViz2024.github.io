@@ -32,10 +32,10 @@ const svgCls = d3
 // Color scale for non-platform categories
 const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
-let currentNode = null; // Récupérer le noeud objet de zoom
-let nodeStack = []; // Garder mémoire l'historique de zoom
+let currentNode = null; // Retrieve the zoom object node
+let nodeStack = []; // Remember zoom history
 
-// Variables pour le filtrage
+// Variables for filtering
 let isYearFilterEnabledGenre = true;
 let isYearFilterEnabledCls = true;
 let typeCls = "All";
@@ -51,11 +51,11 @@ d3.csv("data/streaming_data.csv").then(function (data) {
   const continents = ["All", ...new Set(data.map((d) => d.continent))];
   const types = ["All", ...new Set(data.map((d) => d.type))];
 
-  // Initalisation des filtres
+  // Initialization of filters
   setupFilters(years, continents, "Genre");
   setupFilters(years, continents, "Cls");
 
-  // Initialisation des visus
+  // Initialization of the displays
   updateVisualization(data, "genre", svgGenre);
   updateVisualization(data, "rating", svgCls);
 
@@ -88,18 +88,23 @@ d3.csv("data/streaming_data.csv").then(function (data) {
     .getElementById("voirToutBtnGenre")
     .addEventListener("click", () => toggleVoirTout(data, "genre", svgGenre));
 
-  document.querySelectorAll("input[type='checkbox']").forEach(checkbox => {
+  document.querySelectorAll("input[type='checkbox']").forEach((checkbox) => {
     checkbox.addEventListener("change", () => {
-      const isMovieCheckedCls = document.getElementById("movieCheckboxCls").checked;
-      const isTVShowCheckedCls = document.getElementById("tvShowCheckboxCls").checked;
-      const isMovieCheckedGenre = document.getElementById("movieCheckboxGenre").checked;
-      const isTVShowCheckedGenre = document.getElementById("tvShowCheckboxGenre").checked;
-  
+      const isMovieCheckedCls =
+        document.getElementById("movieCheckboxCls").checked;
+      const isTVShowCheckedCls =
+        document.getElementById("tvShowCheckboxCls").checked;
+      const isMovieCheckedGenre =
+        document.getElementById("movieCheckboxGenre").checked;
+      const isTVShowCheckedGenre = document.getElementById(
+        "tvShowCheckboxGenre"
+      ).checked;
+
       if (isMovieCheckedCls && isTVShowCheckedCls) {
-        typeCls =  "All";
-        updateVisualization(data, "rating",svgCls);
+        typeCls = "All";
+        updateVisualization(data, "rating", svgCls);
       } else if (isMovieCheckedCls) {
-        typeCls =  "Movie";
+        typeCls = "Movie";
         updateVisualization(data, "rating", svgCls);
       } else if (isTVShowCheckedCls) {
         typeCls = "TV Show";
@@ -112,10 +117,10 @@ d3.csv("data/streaming_data.csv").then(function (data) {
       }
 
       if (isMovieCheckedGenre && isTVShowCheckedGenre) {
-        typeGenre =  "All";
+        typeGenre = "All";
         updateVisualization(data, "genre", svgGenre);
       } else if (isMovieCheckedGenre) {
-        typeGenre =  "Movie";
+        typeGenre = "Movie";
         updateVisualization(data, "genre", svgGenre);
       } else if (isTVShowCheckedGenre) {
         typeGenre = "TV Show";
@@ -126,9 +131,8 @@ d3.csv("data/streaming_data.csv").then(function (data) {
         document.getElementById("tvShowCheckboxGenre").checked = true;
         updateVisualization(data, "genre", svgGenre);
       }
-
     });
-  }); 
+  });
 });
 
 function setupFilters(years, continents, info) {
@@ -323,7 +327,7 @@ function updateVisualization(data, type, svg) {
   }
 }
 
-// Fonction pour le filtrage par année ou non
+// Function for filtering by year or not
 function toggleVoirTout(data, type, svg) {
   if (type === "genre") {
     isYearFilterEnabledGenre = !isYearFilterEnabledGenre;
@@ -355,20 +359,21 @@ function toggleVoirTout(data, type, svg) {
     updateVisualization(data, "rating", svg);
   }
 }
+
 // -----------------------------------------------
-// Evolution du contenu
+// Evolution of content
 // -----------------------------------------------
 
-// Fonction pour la création des graphiques d'évolution
+// Function for creating evolution graphs
 function createChart(containerId, data, metric, yAxisLabel) {
   const margin = { top: 40, right: 120, bottom: 60, left: 80 };
   const width = 800 - margin.left - margin.right;
   const height = 400 - margin.top - margin.bottom;
 
-  // Suppression des éléments existants
+  // Delete existing elements
   d3.select(`#${containerId}`).selectAll("*").remove();
 
-  // Création de l'élément svg
+  // Creation of the svg element
   const svg = d3
     .select(`#${containerId}`)
     .append("svg")
@@ -377,7 +382,7 @@ function createChart(containerId, data, metric, yAxisLabel) {
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
-  // Création des échelles
+  // Creation of scales
   const x0 = d3
     .scaleBand()
     .domain(d3.range(2006, 2022))
@@ -393,7 +398,7 @@ function createChart(containerId, data, metric, yAxisLabel) {
     .nice()
     .range([height, 0]);
 
-  // Création des axes
+  // Creation of axes
   svg
     .append("g")
     .attr("class", "x-axis")
@@ -424,7 +429,7 @@ function createChart(containerId, data, metric, yAxisLabel) {
     .attr("y", -margin.left + 20)
     .text(yAxisLabel);
 
-  // Création du tooltip
+  // Creation of the tooltip
   const tooltip = d3
     .select("body")
     .append("div")
@@ -434,7 +439,7 @@ function createChart(containerId, data, metric, yAxisLabel) {
   x1.rangeRound([0, x0.bandwidth()]);
   const groupedData = d3.group(data, (d) => d.year_added);
 
-  // Création des barres
+  // Creation of the bars
   const yearGroups = svg
     .selectAll(".year-group")
     .data(Array.from(groupedData))
@@ -468,13 +473,13 @@ function createChart(containerId, data, metric, yAxisLabel) {
       tooltip.transition().duration(500).style("opacity", 0);
     });
 
-  // Création de la légende
+  // Creating the legend
   const legend = svg
     .append("g")
     .attr("class", "legend")
     .attr("transform", `translate(${width + 10}, 0)`);
 
-  // Création des éléments de la légende
+  // Creation of the legend elements
   Object.entries(platformColors).forEach(([platform, color], i) => {
     const legendRow = legend
       .append("g")
@@ -496,7 +501,7 @@ function createChart(containerId, data, metric, yAxisLabel) {
 }
 
 d3.csv("data/streaming_data.csv").then(function (rawData) {
-  // Initialisation des filtres
+  // Initialization of filters
   const continents = ["All", ...new Set(rawData.map((d) => d.continent))];
   const audiences = ["All", ...new Set(rawData.map((d) => d.audience))];
 
@@ -510,11 +515,11 @@ d3.csv("data/streaming_data.csv").then(function (rawData) {
     .map((t) => `<option value="${t}">${t}</option>`)
     .join("");
 
-  // Fonction pour la mise à jour des graphiques
+  // Function for updating graphs
   function updateCharts(selectedContinent, selectedAudience) {
     let filteredData = rawData;
 
-    // Filtrage additionnel des données en fonction des continents et des audiences
+    // Additional filtering of data based on continents and audiences
     if (selectedContinent !== "All") {
       filteredData = filteredData.filter(
         (d) => d.continent === selectedContinent
@@ -526,7 +531,7 @@ d3.csv("data/streaming_data.csv").then(function (rawData) {
       );
     }
 
-    // Création des données pour les graphiques
+    // Creating data for graphs
     const contentQuantityData = d3.rollup(
       filteredData,
       (v) => v.length,
@@ -548,7 +553,7 @@ d3.csv("data/streaming_data.csv").then(function (rawData) {
       (d) => d.platform
     );
 
-    // Création des graphiques
+    // Creation of graphics
     createChart(
       "content-quantity-chart",
       processRollupData(contentQuantityData),
@@ -571,7 +576,7 @@ d3.csv("data/streaming_data.csv").then(function (rawData) {
     );
   }
 
-  // Fonction pour la transformation des données rollup en un format adapté pour les graphiques
+  // Function for transforming rollup data into a format suitable for charts
   function processRollupData(rollupData) {
     const processedData = [];
     rollupData.forEach((yearValue, year) => {
@@ -586,7 +591,7 @@ d3.csv("data/streaming_data.csv").then(function (rawData) {
     return processedData;
   }
 
-  // Gestion des événements pour la mise à jour des graphiques
+  // Event handling for updating charts
   d3.select("#continent-select").on("change", function () {
     updateCharts(this.value, d3.select("#audience-select").property("value"));
   });
