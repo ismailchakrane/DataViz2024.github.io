@@ -1,6 +1,6 @@
 # StreamViz - Visualization of the Evolution and Distribution of Content on Streaming Platforms
 
-![Teaser](images/teaser.png)
+![Demo](images/demo.gif)
 
 **Team Members**  
 - Rida ASRI  
@@ -120,7 +120,3 @@ Our team uses a Discord group for efficient coordination. Meetings are structure
 ## Progress Tracker  
 
 A project progress tracker is available here: [View Tracker](https://docs.google.com/document/d/1OSPjtboN29_386HHnLslqIUPYdWn3UbKAYVxVNWTt7s/edit?tab=t.0#heading=h.b7mly7b1dew9).
-
-## Demo
-
-![Demo](images/demo.gif)
